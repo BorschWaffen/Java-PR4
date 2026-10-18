@@ -1,6 +1,5 @@
 package ua.edu.sumdu.j2se.pr4;
 
-import java.util.ArrayList;
 import java.util.Scanner;
 
 /**
@@ -9,14 +8,19 @@ import java.util.Scanner;
 public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        ArrayList<Book> books = new ArrayList<>();
+        // Агрегація: створюємо об'єкт Library замість ArrayList у Main
+        Library library = new Library("Центральна Бібліотека СумДУ");
         boolean running = true;
+        Book lastAddedBook = null; // Зберігаємо останню додану книгу для демонстрації копіювання
 
         while (running) {
-            System.out.println("\n--- МЕНЮ ---");
-            System.out.println("1. Створити нову книгу");
-            System.out.println("2. Вивести всі книги");
-            System.out.println("3. Вийти");
+            System.out.println("\n--- " + library.getName() + " ---");
+            // Демонстрація роботи статичного методу
+            System.out.println("Загалом створено об'єктів Book у системі: " + Book.getBookCount());
+            System.out.println("1. Додати нову книгу");
+            System.out.println("2. Вивести всі книги бібліотеки");
+            System.out.println("3. Створити копію останньої доданої книги (Конструктор копіювання)");
+            System.out.println("4. Вийти");
             System.out.print("Оберіть дію: ");
 
             String choice = scanner.nextLine().trim();
@@ -36,32 +40,53 @@ public class Main {
                         System.out.print("Введіть кількість сторінок: ");
                         int pages = Integer.parseInt(scanner.nextLine().trim());
 
-                        // Спроба створення об'єкта. Якщо дані не пройдуть валідацію, викинеться IllegalArgumentException
-                        Book newBook = new Book(title, author, year, pages);
-                        books.add(newBook);
+                        System.out.println("Оберіть жанр: 1-Художня, 2-Фентезі, 3-Наукова, 4-Історія, 5-Інше");
+                        int genreChoice = Integer.parseInt(scanner.nextLine().trim());
+                        Genre genre;
+                        switch (genreChoice) {
+                            case 1: genre = Genre.FICTION; break;
+                            case 2: genre = Genre.FANTASY; break;
+                            case 3: genre = Genre.SCIENCE; break;
+                            case 4: genre = Genre.HISTORY; break;
+                            default: genre = Genre.OTHER; break;
+                        }
+
+                        Book newBook = new Book(title, author, year, pages, genre);
+                        library.addBook(newBook); // Додаємо до об'єкта Library
+                        lastAddedBook = newBook;
                         System.out.println("Книгу успішно додано!");
 
                     } catch (NumberFormatException e) {
-                        System.out.println("Помилка: Рік та кількість сторінок повинні бути числами!");
+                        System.out.println("Помилка: Числові значення (рік, сторінки, жанр) введено неправильно!");
                     } catch (IllegalArgumentException e) {
                         System.out.println("Помилка валідації: " + e.getMessage());
-                    } catch (Exception e) {
-                        System.out.println("Невідома помилка: " + e.getMessage());
                     }
                     break;
 
                 case "2":
-                    if (books.isEmpty()) {
-                        System.out.println("Список книг порожній.");
+                    if (library.isEmpty()) {
+                        System.out.println("Бібліотека порожня.");
                     } else {
                         System.out.println("\n--- Список книг ---");
-                        for (int i = 0; i < books.size(); i++) {
-                            System.out.println((i + 1) + ". " + books.get(i).toString());
+                        int i = 1;
+                        for (Book b : library.getBooks()) {
+                            System.out.println((i++) + ". " + b.toString());
                         }
                     }
                     break;
 
                 case "3":
+                    if (lastAddedBook == null) {
+                        System.out.println("Ви ще не додали жодної книги для копіювання!");
+                    } else {
+                        // Виклик конструктора копіювання
+                        Book copy = new Book(lastAddedBook);
+                        library.addBook(copy);
+                        System.out.println("Копію успішно створено та додано до бібліотеки!");
+                    }
+                    break;
+
+                case "4":
                     System.out.println("Завершення роботи.");
                     running = false;
                     break;

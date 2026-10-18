@@ -7,14 +7,12 @@ class BookTest {
 
     @Test
     void shouldThrowExceptionWhenInvalidValueInSetter() {
-        Book book = new Book("Valid Title", "Valid Author", 2020, 300);
+        // Додали Genre.FICTION у виклик
+        Book book = new Book("Valid Title", "Valid Author", 2020, 300, Genre.FICTION);
 
-        // Перевіряємо, що встановлення від'ємної кількості сторінок викине виняток
         assertThrows(IllegalArgumentException.class, () -> {
             book.setPages(-50);
         });
-
-        // Перевіряємо порожню назву
         assertThrows(IllegalArgumentException.class, () -> {
             book.setTitle("");
         });
@@ -22,9 +20,11 @@ class BookTest {
 
     @Test
     void shouldThrowExceptionWhenInvalidConstructorData() {
-        // Перевіряємо створення об'єкта з некоректним роком (з майбутнього або від'ємним)
         assertThrows(IllegalArgumentException.class, () -> {
-            new Book("Title", "Author", 2050, 100);
+            new Book("Title", "Author", 2050, 100, Genre.FICTION);
+        });
+        assertThrows(IllegalArgumentException.class, () -> {
+            new Book("Title", "Author", 2020, 100, null); // Тест на null жанр
         });
     }
 }
