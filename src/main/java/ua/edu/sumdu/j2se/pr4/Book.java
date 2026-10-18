@@ -4,70 +4,83 @@ import java.util.Objects;
 
 /**
  * Клас, що представляє книгу.
- * Містить перевірку вхідних даних.
+ * Демонструє статичні поля, конструктор копіювання та використання enum.
  */
 public class Book {
+    // Статичне поле для підрахунку створених об'єктів
+    private static int bookCount = 0;
+
     private String title;
     private String author;
     private int year;
-    private int pages; // Новий (4-й) атрибут
+    private int pages;
+    private Genre genre; // Використання enum
 
     /**
-     * Конструктор з повною валідацією параметрів.
+     * Основний конструктор з параметрами.
      */
-    public Book(String title, String author, int year, int pages) {
+    public Book(String title, String author, int year, int pages, Genre genre) {
         setTitle(title);
         setAuthor(author);
         setYear(year);
         setPages(pages);
+        setGenre(genre);
+        bookCount++; // Збільшуємо лічильник при створенні
     }
 
-    public String getTitle() { return title; }
+    /**
+     * Конструктор копіювання.
+     * @param other об'єкт для копіювання
+     */
+    public Book(Book other) {
+        if (other == null) {
+            throw new IllegalArgumentException("Об'єкт для копіювання не може бути null");
+        }
+        this.title = other.title;
+        this.author = other.author;
+        this.year = other.year;
+        this.pages = other.pages;
+        this.genre = other.genre;
+        bookCount++; // Це теж новий об'єкт, тому збільшуємо лічильник
+    }
 
     /**
-     * Встановлює назву. Не може бути порожньою.
+     * Статичний метод для отримання загальної кількості створених книг.
      */
+    public static int getBookCount() {
+        return bookCount;
+    }
+
+    // --- Гетери та сетери ---
+
+    public String getTitle() { return title; }
     public void setTitle(String title) {
-        if (title == null || title.trim().isEmpty()) {
-            throw new IllegalArgumentException("Назва книги не може бути порожньою.");
-        }
+        if (title == null || title.trim().isEmpty()) throw new IllegalArgumentException("Назва не може бути порожньою.");
         this.title = title;
     }
 
     public String getAuthor() { return author; }
-
-    /**
-     * Встановлює автора. Не може бути порожнім.
-     */
     public void setAuthor(String author) {
-        if (author == null || author.trim().isEmpty()) {
-            throw new IllegalArgumentException("Ім'я автора не може бути порожнім.");
-        }
+        if (author == null || author.trim().isEmpty()) throw new IllegalArgumentException("Автор не може бути порожнім.");
         this.author = author;
     }
 
     public int getYear() { return year; }
-
-    /**
-     * Встановлює рік. Не може бути меншим за 1 і більшим за поточний (2026).
-     */
     public void setYear(int year) {
-        if (year <= 0 || year > 2026) {
-            throw new IllegalArgumentException("Некоректний рік видання. Має бути від 1 до 2026.");
-        }
+        if (year <= 0 || year > 2026) throw new IllegalArgumentException("Некоректний рік видання.");
         this.year = year;
     }
 
     public int getPages() { return pages; }
-
-    /**
-     * Встановлює кількість сторінок. Повинна бути більше 0.
-     */
     public void setPages(int pages) {
-        if (pages <= 0) {
-            throw new IllegalArgumentException("Кількість сторінок має бути більшою за нуль.");
-        }
+        if (pages <= 0) throw new IllegalArgumentException("Кількість сторінок має бути більшою за нуль.");
         this.pages = pages;
+    }
+
+    public Genre getGenre() { return genre; }
+    public void setGenre(Genre genre) {
+        if (genre == null) throw new IllegalArgumentException("Жанр не може бути порожнім (null).");
+        this.genre = genre;
     }
 
     @Override
@@ -77,6 +90,7 @@ public class Book {
                 ", author='" + author + '\'' +
                 ", year=" + year +
                 ", pages=" + pages +
+                ", genre=" + genre.getDescription() +
                 '}';
     }
 
@@ -86,6 +100,7 @@ public class Book {
         if (o == null || getClass() != o.getClass()) return false;
         Book book = (Book) o;
         return year == book.year && pages == book.pages &&
+                genre == book.genre &&
                 Objects.equals(title, book.title) &&
                 Objects.equals(author, book.author);
     }
