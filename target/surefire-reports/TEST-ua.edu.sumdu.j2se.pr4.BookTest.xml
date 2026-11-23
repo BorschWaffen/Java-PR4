@@ -14,7 +14,7 @@
     <property name="sun.java.launcher" value="SUN_STANDARD"/>
     <property name="user.country" value="RU"/>
     <property name="sun.boot.library.path" value="C:\Program Files\Microsoft\jdk-25.0.4.101-hotspot\bin"/>
-    <property name="sun.java.command" value="C:\Users\Admin\AppData\Local\Temp\surefire16160554678001690962\surefirebooter-20261123093300910_3.jar C:\Users\Admin\AppData\Local\Temp\surefire16160554678001690962 2026-11-23T09-33-00_766-jvmRun1 surefire-20261123093300910_1tmp surefire_0-20261123093300910_2tmp"/>
+    <property name="sun.java.command" value="C:\Users\Admin\AppData\Local\Temp\surefire824094004426244139\surefirebooter-20261123093812277_3.jar C:\Users\Admin\AppData\Local\Temp\surefire824094004426244139 2026-11-23T09-38-12_144-jvmRun1 surefire-20261123093812277_1tmp surefire_0-20261123093812277_2tmp"/>
     <property name="jdk.debug" value="release"/>
     <property name="surefire.test.class.path" value="E:\java\Pr4\Java-PR4\target\test-classes;E:\java\Pr4\Java-PR4\target\classes;C:\Users\Admin\.m2\repository\org\junit\jupiter\junit-jupiter-api\5.10.2\junit-jupiter-api-5.10.2.jar;C:\Users\Admin\.m2\repository\org\opentest4j\opentest4j\1.3.0\opentest4j-1.3.0.jar;C:\Users\Admin\.m2\repository\org\junit\platform\junit-platform-commons\1.10.2\junit-platform-commons-1.10.2.jar;C:\Users\Admin\.m2\repository\org\apiguardian\apiguardian-api\1.1.2\apiguardian-api-1.1.2.jar;C:\Users\Admin\.m2\repository\org\xerial\sqlite-jdbc\3.46.1.3\sqlite-jdbc-3.46.1.3.jar"/>
     <property name="sun.cpu.endian" value="little"/>
@@ -29,7 +29,7 @@
     <property name="line.separator" value="&#10;"/>
     <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
     <property name="java.specification.name" value="Java Platform API Specification"/>
-    <property name="surefire.real.class.path" value="C:\Users\Admin\AppData\Local\Temp\surefire16160554678001690962\surefirebooter-20261123093300910_3.jar"/>
+    <property name="surefire.real.class.path" value="C:\Users\Admin\AppData\Local\Temp\surefire824094004426244139\surefirebooter-20261123093812277_3.jar"/>
     <property name="user.script" value=""/>
     <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
     <property name="java.runtime.version" value="25.0.4.1+1-LTS"/>
@@ -59,7 +59,7 @@
     <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
     <property name="java.class.version" value="69.0"/>
   </properties>
-  <testcase name="shouldThrowExceptionWhenInvalidValueInSetter" classname="ua.edu.sumdu.j2se.pr4.BookTest" time="0.035"/>
+  <testcase name="shouldThrowExceptionWhenInvalidValueInSetter" classname="ua.edu.sumdu.j2se.pr4.BookTest" time="0.036"/>
   <testcase name="shouldThrowExceptionWhenInvalidConstructorData" classname="ua.edu.sumdu.j2se.pr4.BookTest" time="0.002"/>
-  <testcase name="shouldCompareBooksByTitleConsistently" classname="ua.edu.sumdu.j2se.pr4.BookTest" time="0.003"/>
+  <testcase name="shouldCompareBooksByTitleConsistently" classname="ua.edu.sumdu.j2se.pr4.BookTest" time="0.002"/>
 </testsuite>

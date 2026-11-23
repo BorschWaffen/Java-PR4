@@ -1,11 +1,9 @@
 ua\edu\sumdu\j2se\pr4\BookFileStorage$ParsedRecord.class
-ua\edu\sumdu\j2se\pr4\Main$1.class
 ua\edu\sumdu\j2se\pr4\Library.class
 ua\edu\sumdu\j2se\pr4\Main$BookData.class
 ua\edu\sumdu\j2se\pr4\PaperBook.class
 ua\edu\sumdu\j2se\pr4\AudioBook.class
 ua\edu\sumdu\j2se\pr4\Main.class
-ua\edu\sumdu\j2se\pr4\Main$2.class
 ua\edu\sumdu\j2se\pr4\BookEntry.class
 ua\edu\sumdu\j2se\pr4\BookFileStorage.class
 ua\edu\sumdu\j2se\pr4\Book.class
@@ -13,5 +11,4 @@ ua\edu\sumdu\j2se\pr4\Genre.class
 ua\edu\sumdu\j2se\pr4\EBook.class
 ua\edu\sumdu\j2se\pr4\StandardBook.class
 ua\edu\sumdu\j2se\pr4\ReferenceBook.class
-ua\edu\sumdu\j2se\pr4\Main$3.class
 ua\edu\sumdu\j2se\pr4\DatabaseManager.class

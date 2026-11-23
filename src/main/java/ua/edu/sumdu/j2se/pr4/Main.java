@@ -5,8 +5,8 @@ import java.util.Comparator;
 import java.util.Scanner;
 
 /**
- * Клас-драйвер для Практичної роботи №14.
- * Використовує анонімні внутрішні класи Comparator для сортування колекції за трьома критеріями.
+ * Клас-драйвер для Лабораторної роботи №15.
+ * Використовує лямбда-вирази Comparator для сортування колекції за трьома критеріями.
  */
 public class Main {
     private static final String DATA_FILE = "input.txt";
@@ -17,7 +17,7 @@ public class Main {
         boolean running = true;
 
         System.out.println("===================================================");
-        System.out.println("Практична робота №14: Внутрішні класи та Comparator");
+        System.out.println("Лабораторна робота №15: Лямбда-вирази та Comparator");
         System.out.println("===================================================");
 
         BookFileStorage.loadFromFile(DATA_FILE, library);
@@ -65,7 +65,7 @@ public class Main {
     }
 
     /**
-     * Підменю вибору критерію сортування з використанням анонімних внутрішніх класів Comparator.
+     * Підменю вибору критерію сортування з використанням лямбда-виразів Comparator.
      *
      * @param scanner сканер вхідного потоку
      * @param library бібліотека
@@ -91,66 +91,57 @@ public class Main {
 
             if ("1".equals(sortChoice)) {
                 criterionName = "за назвою (А-Я)";
-                comparator = new Comparator<BookEntry>() {
-                    @Override
-                    public int compare(BookEntry o1, BookEntry o2) {
-                        if (o1 == o2) {
-                            return 0;
-                        }
-                        if (o1 == null) {
-                            return -1;
-                        }
-                        if (o2 == null) {
-                            return 1;
-                        }
-                        int byTitle = o1.getBook().getTitle().compareToIgnoreCase(o2.getBook().getTitle());
-                        if (byTitle != 0) {
-                            return byTitle;
-                        }
-                        return Integer.compare(o1.getBook().getYear(), o2.getBook().getYear());
+                comparator = (o1, o2) -> {
+                    if (o1 == o2) {
+                        return 0;
                     }
+                    if (o1 == null) {
+                        return -1;
+                    }
+                    if (o2 == null) {
+                        return 1;
+                    }
+                    int byTitle = o1.getBook().getTitle().compareToIgnoreCase(o2.getBook().getTitle());
+                    if (byTitle != 0) {
+                        return byTitle;
+                    }
+                    return Integer.compare(o1.getBook().getYear(), o2.getBook().getYear());
                 };
             } else if ("2".equals(sortChoice)) {
                 criterionName = "за роком видання (від старіших до новіших)";
-                comparator = new Comparator<BookEntry>() {
-                    @Override
-                    public int compare(BookEntry o1, BookEntry o2) {
-                        if (o1 == o2) {
-                            return 0;
-                        }
-                        if (o1 == null) {
-                            return -1;
-                        }
-                        if (o2 == null) {
-                            return 1;
-                        }
-                        int byYear = Integer.compare(o1.getBook().getYear(), o2.getBook().getYear());
-                        if (byYear != 0) {
-                            return byYear;
-                        }
-                        return o1.getBook().getTitle().compareToIgnoreCase(o2.getBook().getTitle());
+                comparator = (o1, o2) -> {
+                    if (o1 == o2) {
+                        return 0;
                     }
+                    if (o1 == null) {
+                        return -1;
+                    }
+                    if (o2 == null) {
+                        return 1;
+                    }
+                    int byYear = Integer.compare(o1.getBook().getYear(), o2.getBook().getYear());
+                    if (byYear != 0) {
+                        return byYear;
+                    }
+                    return o1.getBook().getTitle().compareToIgnoreCase(o2.getBook().getTitle());
                 };
             } else if ("3".equals(sortChoice)) {
                 criterionName = "за кількістю сторінок (від менших до більших)";
-                comparator = new Comparator<BookEntry>() {
-                    @Override
-                    public int compare(BookEntry o1, BookEntry o2) {
-                        if (o1 == o2) {
-                            return 0;
-                        }
-                        if (o1 == null) {
-                            return -1;
-                        }
-                        if (o2 == null) {
-                            return 1;
-                        }
-                        int byPages = Integer.compare(o1.getBook().getPages(), o2.getBook().getPages());
-                        if (byPages != 0) {
-                            return byPages;
-                        }
-                        return o1.getBook().getTitle().compareToIgnoreCase(o2.getBook().getTitle());
+                comparator = (o1, o2) -> {
+                    if (o1 == o2) {
+                        return 0;
                     }
+                    if (o1 == null) {
+                        return -1;
+                    }
+                    if (o2 == null) {
+                        return 1;
+                    }
+                    int byPages = Integer.compare(o1.getBook().getPages(), o2.getBook().getPages());
+                    if (byPages != 0) {
+                        return byPages;
+                    }
+                    return o1.getBook().getTitle().compareToIgnoreCase(o2.getBook().getTitle());
                 };
             } else {
                 System.out.println("Некоректний вибір критерію. Оберіть 1–3 або 0 для повернення.");
