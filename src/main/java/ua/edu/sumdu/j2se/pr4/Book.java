@@ -3,21 +3,23 @@ package ua.edu.sumdu.j2se.pr4;
 import java.util.Objects;
 
 /**
- * Клас, що представляє книгу.
- * Демонструє статичні поля, конструктор копіювання та використання enum.
+ * Базовий клас, що представляє книгу.
  */
 public class Book {
-    // Статичне поле для підрахунку створених об'єктів
-    private static int bookCount = 0;
-
     private String title;
     private String author;
     private int year;
     private int pages;
-    private Genre genre; // Використання enum
+    private Genre genre;
 
     /**
-     * Основний конструктор з параметрами.
+     * Конструктор з параметрами.
+     *
+     * @param title  назва книги
+     * @param author автор книги
+     * @param year   рік видання
+     * @param pages  кількість сторінок
+     * @param genre  жанр книги
      */
     public Book(String title, String author, int year, int pages, Genre genre) {
         setTitle(title);
@@ -25,62 +27,111 @@ public class Book {
         setYear(year);
         setPages(pages);
         setGenre(genre);
-        bookCount++; // Збільшуємо лічильник при створенні
     }
 
     /**
      * Конструктор копіювання.
-     * @param other об'єкт для копіювання
+     *
+     * @param other об'єкт Book для копіювання
      */
     public Book(Book other) {
         if (other == null) {
-            throw new IllegalArgumentException("Об'єкт для копіювання не може бути null");
+            throw new IllegalArgumentException("Об'єкт для копіювання не може бути null.");
         }
         this.title = other.title;
         this.author = other.author;
         this.year = other.year;
         this.pages = other.pages;
         this.genre = other.genre;
-        bookCount++; // Це теж новий об'єкт, тому збільшуємо лічильник
+    }
+
+    public String getTitle() {
+        return title;
     }
 
     /**
-     * Статичний метод для отримання загальної кількості створених книг.
+     * Встановлює назву книги.
+     *
+     * @param title назва книги (не порожня)
      */
-    public static int getBookCount() {
-        return bookCount;
-    }
-
-    // --- Гетери та сетери ---
-
-    public String getTitle() { return title; }
     public void setTitle(String title) {
-        if (title == null || title.trim().isEmpty()) throw new IllegalArgumentException("Назва не може бути порожньою.");
+        if (title == null || title.trim().isEmpty()) {
+            throw new IllegalArgumentException("Назва не може бути порожньою.");
+        }
         this.title = title;
     }
 
-    public String getAuthor() { return author; }
+    public String getAuthor() {
+        return author;
+    }
+
+    /**
+     * Встановлює автора книги.
+     *
+     * @param author автор книги (не порожній)
+     */
     public void setAuthor(String author) {
-        if (author == null || author.trim().isEmpty()) throw new IllegalArgumentException("Автор не може бути порожнім.");
+        if (author == null || author.trim().isEmpty()) {
+            throw new IllegalArgumentException("Автор не може бути порожнім.");
+        }
         this.author = author;
     }
 
-    public int getYear() { return year; }
+    public int getYear() {
+        return year;
+    }
+
+    /**
+     * Встановлює рік видання.
+     *
+     * @param year рік від 1 до 2026
+     */
     public void setYear(int year) {
-        if (year <= 0 || year > 2026) throw new IllegalArgumentException("Некоректний рік видання.");
+        if (year <= 0 || year > 2026) {
+            throw new IllegalArgumentException("Некоректний рік видання.");
+        }
         this.year = year;
     }
 
-    public int getPages() { return pages; }
+    public int getPages() {
+        return pages;
+    }
+
+    /**
+     * Встановлює кількість сторінок.
+     *
+     * @param pages кількість сторінок (> 0)
+     */
     public void setPages(int pages) {
-        if (pages <= 0) throw new IllegalArgumentException("Кількість сторінок має бути більшою за нуль.");
+        if (pages <= 0) {
+            throw new IllegalArgumentException("Кількість сторінок має бути більшою за нуль.");
+        }
         this.pages = pages;
     }
 
-    public Genre getGenre() { return genre; }
+    public Genre getGenre() {
+        return genre;
+    }
+
+    /**
+     * Встановлює жанр книги.
+     *
+     * @param genre жанр (не null)
+     */
     public void setGenre(Genre genre) {
-        if (genre == null) throw new IllegalArgumentException("Жанр не може бути порожнім (null).");
+        if (genre == null) {
+            throw new IllegalArgumentException("Жанр не може бути порожнім (null).");
+        }
         this.genre = genre;
+    }
+
+    /**
+     * Повертає короткий опис типу видання для поліморфного виводу.
+     *
+     * @return опис типу видання
+     */
+    public String getEditionInfo() {
+        return "Звичайне видання";
     }
 
     @Override
@@ -99,7 +150,8 @@ public class Book {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Book book = (Book) o;
-        return year == book.year && pages == book.pages &&
+        return year == book.year &&
+                pages == book.pages &&
                 genre == book.genre &&
                 Objects.equals(title, book.title) &&
                 Objects.equals(author, book.author);
