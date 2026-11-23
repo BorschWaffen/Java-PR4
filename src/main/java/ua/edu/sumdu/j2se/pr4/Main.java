@@ -4,18 +4,22 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 /**
- * Клас-драйвер для Практичної роботи №8.
- * Демонструє розширену ієрархію з 5 класів, поліморфізм та роботу з ArrayList.
+ * Клас-драйвер для Практичної роботи №9.
+ * Підтримує ієрархію з 5 класів, поліморфізм, консольне меню та збереження стану у файл.
  */
 public class Main {
+    private static final String DATA_FILE = "input.txt";
+
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         ArrayList<Book> books = new ArrayList<>();
         boolean running = true;
 
         System.out.println("===================================================");
-        System.out.println("Практична робота №8: Ієрархія класів та поліморфізм");
+        System.out.println("Практична робота №9: Ієрархія та робота з файлами");
         System.out.println("===================================================");
+
+        BookFileStorage.loadFromFile(DATA_FILE, books);
 
         while (running) {
             System.out.println("\n--- ГОЛОВНЕ МЕНЮ ---");
@@ -36,6 +40,7 @@ public class Main {
                     break;
 
                 case "3":
+                    BookFileStorage.saveToFile(DATA_FILE, books);
                     System.out.println("Роботу програми завершено.");
                     running = false;
                     break;
