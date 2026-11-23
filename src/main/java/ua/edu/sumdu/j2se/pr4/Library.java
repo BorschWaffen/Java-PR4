@@ -1,9 +1,11 @@
 package ua.edu.sumdu.j2se.pr4;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Клас-контейнер (агрегація), що зберігає колекцію книг і кількість кожного примірника.
+ * Підтримує додавання з обліком кількості, пошук без зміни колекції та сортування через Comparable.
  */
 public class Library {
     private String name;
@@ -78,6 +80,21 @@ public class Library {
      */
     public BookEntry getEntry(int index) {
         return entries.get(index);
+    }
+
+    /**
+     * Повертає відсортований список позицій бібліотеки з використанням Comparable.
+     * Початковий порядок у внутрішньому списку entries не змінюється.
+     *
+     * @return відсортований список BookEntry
+     */
+    public ArrayList<BookEntry> getSortedEntries() {
+        ArrayList<BookEntry> sorted = new ArrayList<BookEntry>();
+        for (int i = 0; i < entries.size(); i++) {
+            sorted.add(entries.get(i));
+        }
+        Collections.sort(sorted);
+        return sorted;
     }
 
     /**

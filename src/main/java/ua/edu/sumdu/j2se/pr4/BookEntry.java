@@ -3,7 +3,7 @@ package ua.edu.sumdu.j2se.pr4;
 /**
  * Елемент колекції бібліотеки, що поєднує об'єкт Book та його кількість (клас-обгортка Integer).
  */
-public class BookEntry {
+public class BookEntry implements Comparable<BookEntry> {
     private Book book;
     private Integer quantity;
 
@@ -43,6 +43,14 @@ public class BookEntry {
         }
         int current = this.quantity.intValue();
         this.quantity = Integer.valueOf(current + additionalCount);
+    }
+
+    @Override
+    public int compareTo(BookEntry other) {
+        if (other == null) {
+            return 1;
+        }
+        return this.book.compareTo(other.book);
     }
 
     @Override

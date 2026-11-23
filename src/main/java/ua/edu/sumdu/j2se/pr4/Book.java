@@ -3,9 +3,10 @@ package ua.edu.sumdu.j2se.pr4;
 import java.util.Objects;
 
 /**
- * Базовий клас, що представляє книгу.
+ * Абстрактний базовий клас, що представляє книгу.
+ * Реалізує Comparable для однозначного та стабільного сортування за базовим атрибутом (назвою).
  */
-public class Book {
+public abstract class Book implements Comparable<Book> {
     private String title;
     private String author;
     private int year;
@@ -58,7 +59,7 @@ public class Book {
         if (title == null || title.trim().isEmpty()) {
             throw new IllegalArgumentException("Назва не може бути порожньою.");
         }
-        this.title = title;
+        this.title = title.trim();
     }
 
     public String getAuthor() {
@@ -74,7 +75,7 @@ public class Book {
         if (author == null || author.trim().isEmpty()) {
             throw new IllegalArgumentException("Автор не може бути порожнім.");
         }
-        this.author = author;
+        this.author = author.trim();
     }
 
     public int getYear() {
@@ -130,8 +131,41 @@ public class Book {
      *
      * @return опис типу видання
      */
-    public String getEditionInfo() {
-        return "Звичайне видання";
+    public abstract String getEditionInfo();
+
+    /**
+     * Порівнює об'єкти Book насамперед за базовим атрибутом — назвою (title).
+     * Додаткові поля використовуються лише як стабільний tie-breaker при однакових назвах.
+     *
+     * @param other інший об'єкт Book
+     * @return від'ємне число, 0 або додатне число згідно з контрактом Comparable
+     */
+    @Override
+    public int compareTo(Book other) {
+        if (other == null) {
+            return 1;
+        }
+        int byTitle = this.title.compareToIgnoreCase(other.title);
+        if (byTitle != 0) {
+            return byTitle;
+        }
+        int byTitleExact = this.title.compareTo(other.title);
+        if (byTitleExact != 0) {
+            return byTitleExact;
+        }
+        int byAuthor = this.author.compareToIgnoreCase(other.author);
+        if (byAuthor != 0) {
+            return byAuthor;
+        }
+        int byYear = Integer.compare(this.year, other.year);
+        if (byYear != 0) {
+            return byYear;
+        }
+        int byPages = Integer.compare(this.pages, other.pages);
+        if (byPages != 0) {
+            return byPages;
+        }
+        return this.genre.name().compareTo(other.genre.name());
     }
 
     @Override

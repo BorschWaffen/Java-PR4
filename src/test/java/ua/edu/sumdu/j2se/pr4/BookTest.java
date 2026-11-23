@@ -7,8 +7,7 @@ class BookTest {
 
     @Test
     void shouldThrowExceptionWhenInvalidValueInSetter() {
-        // Додали Genre.FICTION у виклик
-        Book book = new Book("Valid Title", "Valid Author", 2020, 300, Genre.FICTION);
+        Book book = new StandardBook("Valid Title", "Valid Author", 2020, 300, Genre.FICTION);
 
         assertThrows(IllegalArgumentException.class, () -> {
             book.setPages(-50);
@@ -21,10 +20,20 @@ class BookTest {
     @Test
     void shouldThrowExceptionWhenInvalidConstructorData() {
         assertThrows(IllegalArgumentException.class, () -> {
-            new Book("Title", "Author", 2050, 100, Genre.FICTION);
+            new StandardBook("Title", "Author", 2050, 100, Genre.FICTION);
         });
         assertThrows(IllegalArgumentException.class, () -> {
-            new Book("Title", "Author", 2020, 100, null); // Тест на null жанр
+            new StandardBook("Title", "Author", 2020, 100, null);
         });
+    }
+
+    @Test
+    void shouldCompareBooksByTitleConsistently() {
+        Book first = new StandardBook("Alpha Book", "Author A", 2020, 150, Genre.FICTION);
+        Book second = new StandardBook("Beta Book", "Author B", 2021, 200, Genre.SCIENCE);
+
+        assertTrue(first.compareTo(second) < 0);
+        assertTrue(second.compareTo(first) > 0);
+        assertEquals(0, first.compareTo(new StandardBook("Alpha Book", "Author A", 2020, 150, Genre.FICTION)));
     }
 }

@@ -119,7 +119,7 @@ public class BookFileStorage {
 
         if ("BOOK".equals(type)) {
             int qty = extractQuantity(parts, 6, 7);
-            Book book = new Book(title, author, year, pages, genre);
+            Book book = new StandardBook(title, author, year, pages, genre);
             return new ParsedRecord(book, qty);
         } else if ("EBOOK".equals(type)) {
             if (parts.length < 8) {

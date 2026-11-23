@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 /**
- * Клас-драйвер для Практичної роботи №12.
- * Підтримує ієрархію з 5 класів, поліморфізм, пошук у колекції Library,
- * роботу з файлом input.txt та збереження створених об'єктів у БД через JDBC.
+ * Клас-драйвер для Практичної роботи №13.
+ * Підтримує абстрактний базовий клас з Comparable, ієрархію нащадків,
+ * пошук без зміни колекції, виведення відсортованого списку та збереження у файл.
  */
 public class Main {
     private static final String DATA_FILE = "input.txt";
@@ -17,10 +17,9 @@ public class Main {
         boolean running = true;
 
         System.out.println("===================================================");
-        System.out.println("Практична робота №12: Інтеграція з базою даних (JDBC)");
+        System.out.println("Практична робота №13: Абстрактні класи та Comparable");
         System.out.println("===================================================");
 
-        DatabaseManager dbManager = initializeDatabaseManager(args);
         BookFileStorage.loadFromFile(DATA_FILE, library);
 
         while (running) {
@@ -28,7 +27,8 @@ public class Main {
             System.out.println("1. Пошук об’єкта");
             System.out.println("2. Створити новий об’єкт");
             System.out.println("3. Вивести інформацію про всі об’єкти");
-            System.out.println("4. Завершити роботу програми");
+            System.out.println("4. Вивести відсортовану інформацію про всі книги");
+            System.out.println("5. Завершити роботу програми");
             System.out.print("Оберіть пункт меню: ");
 
             String choice = scanner.nextLine().trim();
@@ -39,7 +39,7 @@ public class Main {
                     break;
 
                 case "2":
-                    createObjectMenu(scanner, library, dbManager);
+                    createObjectMenu(scanner, library);
                     break;
 
                 case "3":
@@ -47,13 +47,17 @@ public class Main {
                     break;
 
                 case "4":
+                    printSortedEntries(library);
+                    break;
+
+                case "5":
                     BookFileStorage.saveToFile(DATA_FILE, library);
                     System.out.println("Роботу програми завершено.");
                     running = false;
                     break;
 
                 default:
-                    System.out.println("Некоректний вибір. Введіть число від 1 до 4.");
+                    System.out.println("Некоректний вибір. Введіть число від 1 до 5.");
             }
         }
 
@@ -61,50 +65,20 @@ public class Main {
     }
 
     /**
-     * Ініціалізує DatabaseManager на основі шляху до конфіг-файлу, переданого через args.
+     * Виводить відсортовану інформацію про всі книги з використанням Comparable.
      *
-     * @param args аргументи командного рядка
-     * @return екземпляр DatabaseManager або null, якщо конфігурація недоступна
+     * @param library бібліотека
      */
-    private static DatabaseManager initializeDatabaseManager(String[] args) {
-        if (args == null || args.length == 0) {
-            System.out.println("Попередження: шлях до файлу конфігурації БД не передано через args.");
-            return null;
-        }
-
-        String configPath = args[0].trim();
-        if (configPath.isEmpty()) {
-            System.out.println("Попередження: передано порожній шлях до файлу конфігурації БД.");
-            return null;
-        }
-
-        try {
-            DatabaseManager manager = new DatabaseManager(configPath);
-            System.out.println("Конфігурацію БД успішно завантажено з файлу: " + configPath);
-            return manager;
-        } catch (Exception e) {
-            System.out.println("Помилка ініціалізації підключення до БД (" + configPath + "): " + e.getMessage());
-            return null;
-        }
-    }
-
-    /**
-     * Зберігає створений об'єкт у БД, якщо DatabaseManager ініціалізований.
-     *
-     * @param dbManager менеджер бази даних
-     * @param book      створений об'єкт
-     */
-    private static void saveToDatabaseIfAvailable(DatabaseManager dbManager, Book book) {
-        if (dbManager == null) {
-            System.out.println("Запис у БД пропущено: DatabaseManager не ініціалізовано.");
+    private static void printSortedEntries(Library library) {
+        if (library.isEmpty()) {
+            System.out.println("Список книг порожній. Немає об'єктів для виведення.");
             return;
         }
 
-        boolean inserted = dbManager.insertBook(book);
-        if (inserted) {
-            System.out.println("Запис успішно додано до таблиці books у базі даних.");
-        } else {
-            System.out.println("Не вдалося додати запис до бази даних.");
+        ArrayList<BookEntry> sorted = library.getSortedEntries();
+        System.out.println("\n--- ВІДСОРТОВАНА ІНФОРМАЦІЯ ПРО ВСІ КНИГИ (всього позицій: " + sorted.size() + ") ---");
+        for (int i = 0; i < sorted.size(); i++) {
+            System.out.println((i + 1) + ". " + sorted.get(i).toString());
         }
     }
 
@@ -226,16 +200,15 @@ public class Main {
     }
 
     /**
-     * Підменю створення об'єкта, додавання до бібліотеки та збереження в БД.
+     * Підменю створення об'єкта та додавання до бібліотеки з урахуванням кількості.
      *
-     * @param scanner   сканер вхідного потоку
-     * @param library   бібліотека
-     * @param dbManager менеджер бази даних
+     * @param scanner сканер вхідного потоку
+     * @param library бібліотека
      */
-    private static void createObjectMenu(Scanner scanner, Library library, DatabaseManager dbManager) {
+    private static void createObjectMenu(Scanner scanner, Library library) {
         while (true) {
             System.out.println("\n--- СТВОРЕННЯ ОБ'ЄКТА: ОБЕРІТЬ ТИП ---");
-            System.out.println("1. Book (звичайна книга)");
+            System.out.println("1. Book (звичайне видання)");
             System.out.println("2. EBook (електронна книга)");
             System.out.println("3. PaperBook (паперова книга)");
             System.out.println("4. AudioBook (аудіокнига)");
@@ -253,15 +226,17 @@ public class Main {
             try {
                 switch (typeChoice) {
                     case "1": {
-                        Book base = readBaseBook(scanner);
+                        BookData data = readBookData(scanner);
                         int qty = readQuantity(scanner);
-                        library.addNewBook(base, qty);
-                        saveToDatabaseIfAvailable(dbManager, base);
+                        Book standardBook = new StandardBook(
+                                data.title, data.author, data.year, data.pages, data.genre
+                        );
+                        library.addNewBook(standardBook, qty);
                         System.out.println("Операцію додавання Book виконано.");
                         return;
                     }
                     case "2": {
-                        Book base = readBaseBook(scanner);
+                        BookData data = readBookData(scanner);
                         System.out.print("Введіть розмір файлу (МБ): ");
                         double sizeMb = Double.parseDouble(scanner.nextLine().trim().replace(',', '.'));
                         System.out.print("Введіть формат файлу (наприклад, EPUB, PDF): ");
@@ -269,16 +244,15 @@ public class Main {
                         int qty = readQuantity(scanner);
 
                         EBook eBook = new EBook(
-                                base.getTitle(), base.getAuthor(), base.getYear(),
-                                base.getPages(), base.getGenre(), sizeMb, format
+                                data.title, data.author, data.year,
+                                data.pages, data.genre, sizeMb, format
                         );
                         library.addNewBook(eBook, qty);
-                        saveToDatabaseIfAvailable(dbManager, eBook);
                         System.out.println("Операцію додавання EBook виконано.");
                         return;
                     }
                     case "3": {
-                        Book base = readBaseBook(scanner);
+                        BookData data = readBookData(scanner);
                         System.out.print("Введіть вагу (грами): ");
                         int weight = Integer.parseInt(scanner.nextLine().trim());
                         System.out.print("Введіть тип палітурки: ");
@@ -286,16 +260,15 @@ public class Main {
                         int qty = readQuantity(scanner);
 
                         PaperBook paperBook = new PaperBook(
-                                base.getTitle(), base.getAuthor(), base.getYear(),
-                                base.getPages(), base.getGenre(), weight, cover
+                                data.title, data.author, data.year,
+                                data.pages, data.genre, weight, cover
                         );
                         library.addNewBook(paperBook, qty);
-                        saveToDatabaseIfAvailable(dbManager, paperBook);
                         System.out.println("Операцію додавання PaperBook виконано.");
                         return;
                     }
                     case "4": {
-                        Book base = readBaseBook(scanner);
+                        BookData data = readBookData(scanner);
                         System.out.print("Введіть тривалість у хвилинах: ");
                         int duration = Integer.parseInt(scanner.nextLine().trim());
                         System.out.print("Введіть ім'я диктора: ");
@@ -303,16 +276,15 @@ public class Main {
                         int qty = readQuantity(scanner);
 
                         AudioBook audioBook = new AudioBook(
-                                base.getTitle(), base.getAuthor(), base.getYear(),
-                                base.getPages(), base.getGenre(), duration, narrator
+                                data.title, data.author, data.year,
+                                data.pages, data.genre, duration, narrator
                         );
                         library.addNewBook(audioBook, qty);
-                        saveToDatabaseIfAvailable(dbManager, audioBook);
                         System.out.println("Операцію додавання AudioBook виконано.");
                         return;
                     }
                     case "5": {
-                        Book base = readBaseBook(scanner);
+                        BookData data = readBookData(scanner);
                         System.out.print("Введіть вагу (грами): ");
                         int weight = Integer.parseInt(scanner.nextLine().trim());
                         System.out.print("Введіть тип палітурки: ");
@@ -324,11 +296,10 @@ public class Main {
                         int qty = readQuantity(scanner);
 
                         ReferenceBook refBook = new ReferenceBook(
-                                base.getTitle(), base.getAuthor(), base.getYear(),
-                                base.getPages(), base.getGenre(), weight, cover, subject, hasIndex
+                                data.title, data.author, data.year,
+                                data.pages, data.genre, weight, cover, subject, hasIndex
                         );
                         library.addNewBook(refBook, qty);
-                        saveToDatabaseIfAvailable(dbManager, refBook);
                         System.out.println("Операцію додавання ReferenceBook виконано.");
                         return;
                     }
@@ -365,7 +336,7 @@ public class Main {
         return Integer.parseInt(scanner.nextLine().trim());
     }
 
-    private static Book readBaseBook(Scanner scanner) {
+    private static BookData readBookData(Scanner scanner) {
         System.out.print("Введіть назву: ");
         String title = scanner.nextLine();
 
@@ -382,7 +353,7 @@ public class Main {
         int genreChoice = Integer.parseInt(scanner.nextLine().trim());
         Genre genre = mapGenreChoice(genreChoice);
 
-        return new Book(title, author, year, pages, genre);
+        return new BookData(title, author, year, pages, genre);
     }
 
     private static boolean parseBooleanInput(String input) {
@@ -394,5 +365,38 @@ public class Main {
             return false;
         }
         throw new IllegalArgumentException("Очікувалося true/false або так/ні.");
+    }
+
+    /**
+     * Конкретний нащадок абстрактного Book для створення базового примірника книги.
+     */
+    private static final class StandardBook extends Book {
+        private StandardBook(String title, String author, int year, int pages, Genre genre) {
+            super(title, author, year, pages, genre);
+        }
+
+        @Override
+        public String getEditionInfo() {
+            return "Базове видання";
+        }
+    }
+
+    /**
+     * Допоміжна структура для тимчасового зберігання базових полів книги під час вводу.
+     */
+    private static final class BookData {
+        private final String title;
+        private final String author;
+        private final int year;
+        private final int pages;
+        private final Genre genre;
+
+        private BookData(String title, String author, int year, int pages, Genre genre) {
+            this.title = title;
+            this.author = author;
+            this.year = year;
+            this.pages = pages;
+            this.genre = genre;
+        }
     }
 }
