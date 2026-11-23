@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 /**
- * Клас-драйвер для демонстрації наслідування, поліморфізму та роботи з ArrayList.
+ * Клас-драйвер для Практичної роботи №8.
+ * Демонструє розширену ієрархію з 5 класів, поліморфізм та роботу з ArrayList.
  */
 public class Main {
     public static void main(String[] args) {
@@ -12,93 +13,35 @@ public class Main {
         ArrayList<Book> books = new ArrayList<>();
         boolean running = true;
 
-        System.out.println("=========================================");
-        System.out.println("Практична робота №7: Книги (Book / EBook / PaperBook)");
-        System.out.println("=========================================");
+        System.out.println("===================================================");
+        System.out.println("Практична робота №8: Ієрархія класів та поліморфізм");
+        System.out.println("===================================================");
 
         while (running) {
-            System.out.println("\n--- МЕНЮ ---");
-            System.out.println("1. Додати звичайну книгу (Book)");
-            System.out.println("2. Додати електронну книгу (EBook)");
-            System.out.println("3. Додати паперову книгу (PaperBook)");
-            System.out.println("4. Вивести всі книги (поліморфний перегляд)");
-            System.out.println("5. Вийти");
-            System.out.print("Оберіть дію: ");
+            System.out.println("\n--- ГОЛОВНЕ МЕНЮ ---");
+            System.out.println("1. Створити новий об’єкт");
+            System.out.println("2. Вивести інформацію про всі об’єкти");
+            System.out.println("3. Завершити роботу програми");
+            System.out.print("Оберіть пункт меню: ");
 
             String choice = scanner.nextLine().trim();
 
-            try {
-                switch (choice) {
-                    case "1":
-                        Book book = readBaseBook(scanner);
-                        books.add(book);
-                        System.out.println("Звичайну книгу додано.");
-                        break;
+            switch (choice) {
+                case "1":
+                    createObjectMenu(scanner, books);
+                    break;
 
-                    case "2":
-                        Book baseForEBook = readBaseBook(scanner);
-                        System.out.print("Введіть розмір файлу (МБ): ");
-                        double sizeMb = Double.parseDouble(scanner.nextLine().trim().replace(',', '.'));
-                        System.out.print("Введіть формат (наприклад, EPUB, PDF): ");
-                        String format = scanner.nextLine();
+                case "2":
+                    printAllBooks(books);
+                    break;
 
-                        EBook eBook = new EBook(
-                                baseForEBook.getTitle(),
-                                baseForEBook.getAuthor(),
-                                baseForEBook.getYear(),
-                                baseForEBook.getPages(),
-                                baseForEBook.getGenre(),
-                                sizeMb,
-                                format
-                        );
-                        books.add(eBook);
-                        System.out.println("Електронну книгу додано.");
-                        break;
+                case "3":
+                    System.out.println("Роботу програми завершено.");
+                    running = false;
+                    break;
 
-                    case "3":
-                        Book baseForPaper = readBaseBook(scanner);
-                        System.out.print("Введіть вагу (грами): ");
-                        int weight = Integer.parseInt(scanner.nextLine().trim());
-                        System.out.print("Введіть тип палітурки (наприклад, Тверда, М'яка): ");
-                        String cover = scanner.nextLine();
-
-                        PaperBook paperBook = new PaperBook(
-                                baseForPaper.getTitle(),
-                                baseForPaper.getAuthor(),
-                                baseForPaper.getYear(),
-                                baseForPaper.getPages(),
-                                baseForPaper.getGenre(),
-                                weight,
-                                cover
-                        );
-                        books.add(paperBook);
-                        System.out.println("Паперову книгу додано.");
-                        break;
-
-                    case "4":
-                        if (books.isEmpty()) {
-                            System.out.println("Список книг порожній.");
-                        } else {
-                            System.out.println("\n--- Усі книги в колекції ---");
-                            for (int i = 0; i < books.size(); i++) {
-                                Book current = books.get(i);
-                                System.out.println((i + 1) + ". [" + current.getEditionInfo() + "] " + current.toString());
-                            }
-                        }
-                        break;
-
-                    case "5":
-                        System.out.println("Завершення роботи.");
-                        running = false;
-                        break;
-
-                    default:
-                        System.out.println("Невідома команда. Спробуйте ще раз.");
-                }
-            } catch (NumberFormatException e) {
-                System.out.println("Помилка: очікувалося коректне числове значення.");
-            } catch (IllegalArgumentException e) {
-                System.out.println("Помилка валідації: " + e.getMessage());
+                default:
+                    System.out.println("Некоректний вибір. Введіть 1, 2 або 3.");
             }
         }
 
@@ -106,10 +49,135 @@ public class Main {
     }
 
     /**
-     * Зчитує спільні поля базового класу Book з консолі.
+     * Підменю створення нового об'єкта обраного типу з можливістю повернення назад.
      *
      * @param scanner сканер вхідного потоку
-     * @return створений об'єкт Book
+     * @param books   колекція створених об'єктів
+     */
+    private static void createObjectMenu(Scanner scanner, ArrayList<Book> books) {
+        while (true) {
+            System.out.println("\n--- СТВОРЕННЯ ОБ'ЄКТА: ОБЕРІТЬ ТИП ---");
+            System.out.println("1. Book (звичайна книга)");
+            System.out.println("2. EBook (електронна книга)");
+            System.out.println("3. PaperBook (паперова книга)");
+            System.out.println("4. AudioBook (аудіокнига)");
+            System.out.println("5. ReferenceBook (довідкове видання)");
+            System.out.println("0. Повернутися до головного меню");
+            System.out.print("Ваш вибір: ");
+
+            String typeChoice = scanner.nextLine().trim();
+
+            if ("0".equals(typeChoice)) {
+                System.out.println("Повернення до головного меню без створення об'єкта.");
+                return;
+            }
+
+            try {
+                switch (typeChoice) {
+                    case "1": {
+                        Book base = readBaseBook(scanner);
+                        books.add(base);
+                        System.out.println("Об'єкт Book додано до колекції.");
+                        return;
+                    }
+                    case "2": {
+                        Book base = readBaseBook(scanner);
+                        System.out.print("Введіть розмір файлу (МБ): ");
+                        double sizeMb = Double.parseDouble(scanner.nextLine().trim().replace(',', '.'));
+                        System.out.print("Введіть формат файлу (наприклад, EPUB, PDF): ");
+                        String format = scanner.nextLine();
+
+                        EBook eBook = new EBook(
+                                base.getTitle(), base.getAuthor(), base.getYear(),
+                                base.getPages(), base.getGenre(), sizeMb, format
+                        );
+                        books.add(eBook);
+                        System.out.println("Об'єкт EBook додано до колекції.");
+                        return;
+                    }
+                    case "3": {
+                        Book base = readBaseBook(scanner);
+                        System.out.print("Введіть вагу (грами): ");
+                        int weight = Integer.parseInt(scanner.nextLine().trim());
+                        System.out.print("Введіть тип палітурки: ");
+                        String cover = scanner.nextLine();
+
+                        PaperBook paperBook = new PaperBook(
+                                base.getTitle(), base.getAuthor(), base.getYear(),
+                                base.getPages(), base.getGenre(), weight, cover
+                        );
+                        books.add(paperBook);
+                        System.out.println("Об'єкт PaperBook додано до колекції.");
+                        return;
+                    }
+                    case "4": {
+                        Book base = readBaseBook(scanner);
+                        System.out.print("Введіть тривалість у хвилинах: ");
+                        int duration = Integer.parseInt(scanner.nextLine().trim());
+                        System.out.print("Введіть ім'я диктора: ");
+                        String narrator = scanner.nextLine();
+
+                        AudioBook audioBook = new AudioBook(
+                                base.getTitle(), base.getAuthor(), base.getYear(),
+                                base.getPages(), base.getGenre(), duration, narrator
+                        );
+                        books.add(audioBook);
+                        System.out.println("Об'єкт AudioBook додано до колекції.");
+                        return;
+                    }
+                    case "5": {
+                        Book base = readBaseBook(scanner);
+                        System.out.print("Введіть вагу (грами): ");
+                        int weight = Integer.parseInt(scanner.nextLine().trim());
+                        System.out.print("Введіть тип палітурки: ");
+                        String cover = scanner.nextLine();
+                        System.out.print("Введіть предметну галузь: ");
+                        String subject = scanner.nextLine();
+                        System.out.print("Чи є покажчик (true/false або так/ні): ");
+                        boolean hasIndex = parseBooleanInput(scanner.nextLine().trim());
+
+                        ReferenceBook refBook = new ReferenceBook(
+                                base.getTitle(), base.getAuthor(), base.getYear(),
+                                base.getPages(), base.getGenre(), weight, cover, subject, hasIndex
+                        );
+                        books.add(refBook);
+                        System.out.println("Об'єкт ReferenceBook додано до колекції.");
+                        return;
+                    }
+                    default:
+                        System.out.println("Невідомий тип об'єкта. Спробуйте ще раз або натисніть 0 для виходу.");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Помилка введення: очікувалося коректне числове значення.");
+            } catch (IllegalArgumentException e) {
+                System.out.println("Помилка валідації: " + e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Виводить інформацію про всі об'єкти з колекції через поліморфізм.
+     *
+     * @param books колекція об'єктів Book
+     */
+    private static void printAllBooks(ArrayList<Book> books) {
+        if (books.isEmpty()) {
+            System.out.println("Колекція порожня. Спочатку створіть хоча б один об'єкт.");
+            return;
+        }
+
+        System.out.println("\n--- УСІ ОБ'ЄКТИ В КОЛЕКЦІЇ (всього: " + books.size() + ") ---");
+        for (int i = 0; i < books.size(); i++) {
+            Book item = books.get(i);
+            System.out.println((i + 1) + ". [" + item.getEditionInfo() + "] " + item.toString());
+        }
+    }
+
+    /**
+     * Зчитує базові атрибути книги з консолі.
+     *
+     * @param scanner сканер вхідного потоку
+     * @return об'єкт Book з базовими полями
      */
     private static Book readBaseBook(Scanner scanner) {
         System.out.print("Введіть назву: ");
@@ -147,5 +215,22 @@ public class Main {
         }
 
         return new Book(title, author, year, pages, genre);
+    }
+
+    /**
+     * Розпізнає логічне значення з тексту (true/false/так/ні/1/0).
+     *
+     * @param input рядок користувача
+     * @return логічне значення
+     */
+    private static boolean parseBooleanInput(String input) {
+        String normalized = input.toLowerCase();
+        if ("true".equals(normalized) || "так".equals(normalized) || "yes".equals(normalized) || "1".equals(normalized)) {
+            return true;
+        }
+        if ("false".equals(normalized) || "ні".equals(normalized) || "no".equals(normalized) || "0".equals(normalized)) {
+            return false;
+        }
+        throw new IllegalArgumentException("Очікувалося true/false або так/ні.");
     }
 }
