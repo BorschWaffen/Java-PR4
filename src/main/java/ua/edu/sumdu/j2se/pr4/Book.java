@@ -1,12 +1,14 @@
 package ua.edu.sumdu.j2se.pr4;
 
 import java.util.Objects;
+import java.util.UUID;
 
 /**
  * Абстрактний базовий клас, що представляє книгу.
- * Реалізує Comparable для однозначного та стабільного сортування за базовим атрибутом (назвою).
+ * Реалізує Identifiable (унікальний UUID) та Comparable для сортування за базовим атрибутом.
  */
-public abstract class Book implements Comparable<Book> {
+public abstract class Book implements Comparable<Book>, Identifiable {
+    private UUID uuid;
     private String title;
     private String author;
     private int year;
@@ -14,7 +16,7 @@ public abstract class Book implements Comparable<Book> {
     private Genre genre;
 
     /**
-     * Конструктор з параметрами.
+     * Конструктор з параметрами. Автоматично генерує унікальний UUID.
      *
      * @param title  назва книги
      * @param author автор книги
@@ -23,6 +25,7 @@ public abstract class Book implements Comparable<Book> {
      * @param genre  жанр книги
      */
     public Book(String title, String author, int year, int pages, Genre genre) {
+        this.uuid = UUID.randomUUID();
         setTitle(title);
         setAuthor(author);
         setYear(year);
@@ -31,7 +34,7 @@ public abstract class Book implements Comparable<Book> {
     }
 
     /**
-     * Конструктор копіювання.
+     * Конструктор копіювання. Створює новий об'єкт із власним UUID.
      *
      * @param other об'єкт Book для копіювання
      */
@@ -39,11 +42,17 @@ public abstract class Book implements Comparable<Book> {
         if (other == null) {
             throw new IllegalArgumentException("Об'єкт для копіювання не може бути null.");
         }
+        this.uuid = UUID.randomUUID();
         this.title = other.title;
         this.author = other.author;
         this.year = other.year;
         this.pages = other.pages;
         this.genre = other.genre;
+    }
+
+    @Override
+    public UUID getUuid() {
+        return uuid;
     }
 
     public String getTitle() {
@@ -134,12 +143,14 @@ public abstract class Book implements Comparable<Book> {
     public abstract String getEditionInfo();
 
     /**
-     * Порівнює об'єкти Book насамперед за базовим атрибутом — назвою (title).
-     * Додаткові поля використовуються лише як стабільний tie-breaker при однакових назвах.
+     * Коротке представлення об'єкта для списків (назва/автор + UUID).
      *
-     * @param other інший об'єкт Book
-     * @return від'ємне число, 0 або додатне число згідно з контрактом Comparable
+     * @return короткий рядок
      */
+    public String toShortString() {
+        return "Book: " + title + " (" + author + ") | UUID: " + uuid.toString();
+    }
+
     @Override
     public int compareTo(Book other) {
         if (other == null) {
@@ -171,7 +182,8 @@ public abstract class Book implements Comparable<Book> {
     @Override
     public String toString() {
         return "Book{" +
-                "title='" + title + '\'' +
+                "uuid=" + uuid +
+                ", title='" + title + '\'' +
                 ", author='" + author + '\'' +
                 ", year=" + year +
                 ", pages=" + pages +

@@ -5,8 +5,9 @@ import java.util.Comparator;
 import java.util.Scanner;
 
 /**
- * Клас-драйвер для Лабораторної роботи №15.
- * Використовує лямбда-вирази Comparator для сортування колекції за трьома критеріями.
+ * Клас-драйвер для Лабораторної роботи №16.
+ * Підтримує абстрактний базовий клас з UUID та Comparable, ієрархію нащадків,
+ * пошук у колекції (включно з пошуком за UUID), сортування через Comparator та роботу з файлом.
  */
 public class Main {
     private static final String DATA_FILE = "input.txt";
@@ -17,7 +18,7 @@ public class Main {
         boolean running = true;
 
         System.out.println("===================================================");
-        System.out.println("Лабораторна робота №15: Лямбда-вирази та Comparator");
+        System.out.println("Лабораторна робота №16: UUID та JavaFX GUI");
         System.out.println("===================================================");
 
         BookFileStorage.loadFromFile(DATA_FILE, library);
@@ -173,6 +174,7 @@ public class Main {
             System.out.println("1. За назвою (містить текст)");
             System.out.println("2. За жанром");
             System.out.println("3. За мінімальною кількістю сторінок");
+            System.out.println("4. За UUID");
             System.out.println("0. Повернутися до головного меню");
             System.out.print("Ваш вибір: ");
 
@@ -183,7 +185,7 @@ public class Main {
                 return;
             }
 
-            if (library.isEmpty()) {
+            if (library.isEmpty() && !"4".equals(criterionChoice)) {
                 System.out.println("Бібліотека порожня — пошук не дав результатів.");
                 continue;
             }
@@ -220,8 +222,24 @@ public class Main {
                     }
                     break;
 
+                case "4":
+                    System.out.print("Введіть UUID об'єкта: ");
+                    String uuidInput = scanner.nextLine().trim();
+                    try {
+                        BookEntry found = library.findBookByUuid(uuidInput);
+                        if (found == null) {
+                            System.out.println("Об'єкт із вказаним UUID не знайдено.");
+                        } else {
+                            System.out.println("\n--- ЗНАЙДЕНО ЗА UUID ---");
+                            System.out.println(found.toString());
+                        }
+                    } catch (IllegalArgumentException e) {
+                        System.out.println("Помилка: некоректний формат UUID (" + e.getMessage() + ").");
+                    }
+                    break;
+
                 default:
-                    System.out.println("Невідомий критерій пошуку. Оберіть 1–3 або 0 для виходу.");
+                    System.out.println("Невідомий критерій пошуку. Оберіть 1–4 або 0 для виходу.");
             }
         }
     }
@@ -311,7 +329,7 @@ public class Main {
                                 data.title, data.author, data.year, data.pages, data.genre
                         );
                         library.addNewBook(standardBook, qty);
-                        System.out.println("Операцію додавання Book виконано.");
+                        System.out.println("Операцію додавання Book виконано. UUID: " + standardBook.getUuid());
                         return;
                     }
                     case "2": {
@@ -327,141 +345,10 @@ public class Main {
                                 data.pages, data.genre, sizeMb, format
                         );
                         library.addNewBook(eBook, qty);
-                        System.out.println("Операцію додавання EBook виконано.");
+                        System.out.println("Операцію додавання EBook виконано. UUID: " + eBook.getUuid());
                         return;
                     }
                     case "3": {
                         BookData data = readBookData(scanner);
                         System.out.print("Введіть вагу (грами): ");
-                        int weight = Integer.parseInt(scanner.nextLine().trim());
-                        System.out.print("Введіть тип палітурки: ");
-                        String cover = scanner.nextLine();
-                        int qty = readQuantity(scanner);
-
-                        PaperBook paperBook = new PaperBook(
-                                data.title, data.author, data.year,
-                                data.pages, data.genre, weight, cover
-                        );
-                        library.addNewBook(paperBook, qty);
-                        System.out.println("Операцію додавання PaperBook виконано.");
-                        return;
-                    }
-                    case "4": {
-                        BookData data = readBookData(scanner);
-                        System.out.print("Введіть тривалість у хвилинах: ");
-                        int duration = Integer.parseInt(scanner.nextLine().trim());
-                        System.out.print("Введіть ім'я диктора: ");
-                        String narrator = scanner.nextLine();
-                        int qty = readQuantity(scanner);
-
-                        AudioBook audioBook = new AudioBook(
-                                data.title, data.author, data.year,
-                                data.pages, data.genre, duration, narrator
-                        );
-                        library.addNewBook(audioBook, qty);
-                        System.out.println("Операцію додавання AudioBook виконано.");
-                        return;
-                    }
-                    case "5": {
-                        BookData data = readBookData(scanner);
-                        System.out.print("Введіть вагу (грами): ");
-                        int weight = Integer.parseInt(scanner.nextLine().trim());
-                        System.out.print("Введіть тип палітурки: ");
-                        String cover = scanner.nextLine();
-                        System.out.print("Введіть предметну галузь: ");
-                        String subject = scanner.nextLine();
-                        System.out.print("Чи є покажчик (true/false або так/ні): ");
-                        boolean hasIndex = parseBooleanInput(scanner.nextLine().trim());
-                        int qty = readQuantity(scanner);
-
-                        ReferenceBook refBook = new ReferenceBook(
-                                data.title, data.author, data.year,
-                                data.pages, data.genre, weight, cover, subject, hasIndex
-                        );
-                        library.addNewBook(refBook, qty);
-                        System.out.println("Операцію додавання ReferenceBook виконано.");
-                        return;
-                    }
-                    default:
-                        System.out.println("Невідомий тип об'єкта. Спробуйте ще раз або натисніть 0 для виходу.");
-                }
-            } catch (NumberFormatException e) {
-                System.out.println("Помилка введення: очікувалося коректне числове значення.");
-            } catch (IllegalArgumentException e) {
-                System.out.println("Помилка валідації: " + e.getMessage());
-            }
-        }
-    }
-
-    /**
-     * Виводить усі позиції з бібліотеки та їхню кількість.
-     *
-     * @param library бібліотека
-     */
-    private static void printAllEntries(Library library) {
-        if (library.isEmpty()) {
-            System.out.println("Бібліотека порожня. Спочатку створіть хоча б один об'єкт.");
-            return;
-        }
-
-        System.out.println("\n--- УСІ ОБ'ЄКТИ В БІБЛІОТЕЦІ (позицій: " + library.size() + ") ---");
-        for (int i = 0; i < library.size(); i++) {
-            System.out.println((i + 1) + ". " + library.getEntry(i).toString());
-        }
-    }
-
-    private static int readQuantity(Scanner scanner) {
-        System.out.print("Введіть кількість примірників: ");
-        return Integer.parseInt(scanner.nextLine().trim());
-    }
-
-    private static BookData readBookData(Scanner scanner) {
-        System.out.print("Введіть назву: ");
-        String title = scanner.nextLine();
-
-        System.out.print("Введіть автора: ");
-        String author = scanner.nextLine();
-
-        System.out.print("Введіть рік видання: ");
-        int year = Integer.parseInt(scanner.nextLine().trim());
-
-        System.out.print("Введіть кількість сторінок: ");
-        int pages = Integer.parseInt(scanner.nextLine().trim());
-
-        System.out.println("Оберіть жанр: 1-Художня, 2-Фентезі, 3-Наукова, 4-Історія, 5-Інше");
-        int genreChoice = Integer.parseInt(scanner.nextLine().trim());
-        Genre genre = mapGenreChoice(genreChoice);
-
-        return new BookData(title, author, year, pages, genre);
-    }
-
-    private static boolean parseBooleanInput(String input) {
-        String normalized = input.toLowerCase();
-        if ("true".equals(normalized) || "так".equals(normalized) || "yes".equals(normalized) || "1".equals(normalized)) {
-            return true;
-        }
-        if ("false".equals(normalized) || "ні".equals(normalized) || "no".equals(normalized) || "0".equals(normalized)) {
-            return false;
-        }
-        throw new IllegalArgumentException("Очікувалося true/false або так/ні.");
-    }
-
-    /**
-     * Допоміжна структура для тимчасового зберігання базових полів книги під час вводу.
-     */
-    private static final class BookData {
-        private final String title;
-        private final String author;
-        private final int year;
-        private final int pages;
-        private final Genre genre;
-
-        private BookData(String title, String author, int year, int pages, Genre genre) {
-            this.title = title;
-            this.author = author;
-            this.year = year;
-            this.pages = pages;
-            this.genre = genre;
-        }
-    }
-}
+                        int weight = Integer

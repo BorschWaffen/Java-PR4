@@ -3,10 +3,11 @@ package ua.edu.sumdu.j2se.pr4;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.UUID;
 
 /**
  * Клас-контейнер (агрегація), що зберігає колекцію книг і кількість кожного примірника.
- * Підтримує додавання з обліком кількості, пошук без зміни колекції та сортування через Comparable і Comparator.
+ * Підтримує додавання з обліком кількості, пошук (включно з UUID) та сортування.
  */
 public class Library {
     private String name;
@@ -173,5 +174,26 @@ public class Library {
             }
         }
         return matches;
+    }
+
+    /**
+     * Пошук 4: за рядковим представленням UUID.
+     * Кидає IllegalArgumentException при некоректному форматі UUID.
+     *
+     * @param uuidString рядок з UUID
+     * @return знайдена позиція BookEntry або null, якщо не знайдено
+     */
+    public BookEntry findBookByUuid(String uuidString) {
+        if (uuidString == null || uuidString.trim().isEmpty()) {
+            throw new IllegalArgumentException("UUID не може бути порожнім.");
+        }
+        UUID targetUuid = UUID.fromString(uuidString.trim());
+        for (int i = 0; i < entries.size(); i++) {
+            BookEntry entry = entries.get(i);
+            if (targetUuid.equals(entry.getBook().getUuid())) {
+                return entry;
+            }
+        }
+        return null;
     }
 }
