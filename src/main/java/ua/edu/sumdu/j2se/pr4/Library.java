@@ -2,10 +2,11 @@ package ua.edu.sumdu.j2se.pr4;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 
 /**
  * Клас-контейнер (агрегація), що зберігає колекцію книг і кількість кожного примірника.
- * Підтримує додавання з обліком кількості, пошук без зміни колекції та сортування через Comparable.
+ * Підтримує додавання з обліком кількості, пошук без зміни колекції та сортування через Comparable і Comparator.
  */
 public class Library {
     private String name;
@@ -94,6 +95,25 @@ public class Library {
             sorted.add(entries.get(i));
         }
         Collections.sort(sorted);
+        return sorted;
+    }
+
+    /**
+     * Повертає відсортований список позицій бібліотеки з використанням переданого Comparator.
+     * Початковий порядок у внутрішньому списку entries не змінюється.
+     *
+     * @param comparator компаратор для порівняння елементів BookEntry
+     * @return відсортований список BookEntry
+     */
+    public ArrayList<BookEntry> getSortedEntries(Comparator<BookEntry> comparator) {
+        if (comparator == null) {
+            throw new IllegalArgumentException("Компаратор не може бути null.");
+        }
+        ArrayList<BookEntry> sorted = new ArrayList<BookEntry>();
+        for (int i = 0; i < entries.size(); i++) {
+            sorted.add(entries.get(i));
+        }
+        Collections.sort(sorted, comparator);
         return sorted;
     }
 

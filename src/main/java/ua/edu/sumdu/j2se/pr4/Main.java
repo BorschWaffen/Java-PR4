@@ -1,12 +1,12 @@
 package ua.edu.sumdu.j2se.pr4;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Scanner;
 
 /**
- * Клас-драйвер для Практичної роботи №13.
- * Підтримує абстрактний базовий клас з Comparable, ієрархію нащадків,
- * пошук без зміни колекції, виведення відсортованого списку та збереження у файл.
+ * Клас-драйвер для Практичної роботи №14.
+ * Використовує анонімні внутрішні класи Comparator для сортування колекції за трьома критеріями.
  */
 public class Main {
     private static final String DATA_FILE = "input.txt";
@@ -17,7 +17,7 @@ public class Main {
         boolean running = true;
 
         System.out.println("===================================================");
-        System.out.println("Практична робота №13: Абстрактні класи та Comparable");
+        System.out.println("Практична робота №14: Внутрішні класи та Comparator");
         System.out.println("===================================================");
 
         BookFileStorage.loadFromFile(DATA_FILE, library);
@@ -47,7 +47,7 @@ public class Main {
                     break;
 
                 case "4":
-                    printSortedEntries(library);
+                    sortMenu(scanner, library);
                     break;
 
                 case "5":
@@ -65,20 +65,108 @@ public class Main {
     }
 
     /**
-     * Виводить відсортовану інформацію про всі книги з використанням Comparable.
+     * Підменю вибору критерію сортування з використанням анонімних внутрішніх класів Comparator.
      *
+     * @param scanner сканер вхідного потоку
      * @param library бібліотека
      */
-    private static void printSortedEntries(Library library) {
-        if (library.isEmpty()) {
-            System.out.println("Список книг порожній. Немає об'єктів для виведення.");
-            return;
-        }
+    private static void sortMenu(Scanner scanner, Library library) {
+        while (true) {
+            System.out.println("\n--- СОРТУВАННЯ: ОБЕРІТЬ КРИТЕРІЙ ---");
+            System.out.println("1. Сортувати за назвою (А-Я)");
+            System.out.println("2. Сортувати за роком видання (від старіших до новіших)");
+            System.out.println("3. Сортувати за кількістю сторінок (від менших до більших)");
+            System.out.println("0. Повернутися в головне меню");
+            System.out.print("Ваш вибір: ");
 
-        ArrayList<BookEntry> sorted = library.getSortedEntries();
-        System.out.println("\n--- ВІДСОРТОВАНА ІНФОРМАЦІЯ ПРО ВСІ КНИГИ (всього позицій: " + sorted.size() + ") ---");
-        for (int i = 0; i < sorted.size(); i++) {
-            System.out.println((i + 1) + ". " + sorted.get(i).toString());
+            String sortChoice = scanner.nextLine().trim();
+
+            if ("0".equals(sortChoice)) {
+                System.out.println("Повернення в головне меню.");
+                return;
+            }
+
+            Comparator<BookEntry> comparator = null;
+            String criterionName = "";
+
+            if ("1".equals(sortChoice)) {
+                criterionName = "за назвою (А-Я)";
+                comparator = new Comparator<BookEntry>() {
+                    @Override
+                    public int compare(BookEntry o1, BookEntry o2) {
+                        if (o1 == o2) {
+                            return 0;
+                        }
+                        if (o1 == null) {
+                            return -1;
+                        }
+                        if (o2 == null) {
+                            return 1;
+                        }
+                        int byTitle = o1.getBook().getTitle().compareToIgnoreCase(o2.getBook().getTitle());
+                        if (byTitle != 0) {
+                            return byTitle;
+                        }
+                        return Integer.compare(o1.getBook().getYear(), o2.getBook().getYear());
+                    }
+                };
+            } else if ("2".equals(sortChoice)) {
+                criterionName = "за роком видання (від старіших до новіших)";
+                comparator = new Comparator<BookEntry>() {
+                    @Override
+                    public int compare(BookEntry o1, BookEntry o2) {
+                        if (o1 == o2) {
+                            return 0;
+                        }
+                        if (o1 == null) {
+                            return -1;
+                        }
+                        if (o2 == null) {
+                            return 1;
+                        }
+                        int byYear = Integer.compare(o1.getBook().getYear(), o2.getBook().getYear());
+                        if (byYear != 0) {
+                            return byYear;
+                        }
+                        return o1.getBook().getTitle().compareToIgnoreCase(o2.getBook().getTitle());
+                    }
+                };
+            } else if ("3".equals(sortChoice)) {
+                criterionName = "за кількістю сторінок (від менших до більших)";
+                comparator = new Comparator<BookEntry>() {
+                    @Override
+                    public int compare(BookEntry o1, BookEntry o2) {
+                        if (o1 == o2) {
+                            return 0;
+                        }
+                        if (o1 == null) {
+                            return -1;
+                        }
+                        if (o2 == null) {
+                            return 1;
+                        }
+                        int byPages = Integer.compare(o1.getBook().getPages(), o2.getBook().getPages());
+                        if (byPages != 0) {
+                            return byPages;
+                        }
+                        return o1.getBook().getTitle().compareToIgnoreCase(o2.getBook().getTitle());
+                    }
+                };
+            } else {
+                System.out.println("Некоректний вибір критерію. Оберіть 1–3 або 0 для повернення.");
+                continue;
+            }
+
+            if (library.isEmpty()) {
+                System.out.println("Список книг порожній. Немає об'єктів для виведення (" + criterionName + ").");
+                continue;
+            }
+
+            ArrayList<BookEntry> sorted = library.getSortedEntries(comparator);
+            System.out.println("\n--- ВІДСОРТОВАНІ ОБ'ЄКТИ (" + criterionName + ", позицій: " + sorted.size() + ") ---");
+            for (int i = 0; i < sorted.size(); i++) {
+                System.out.println((i + 1) + ". " + sorted.get(i).toString());
+            }
         }
     }
 
@@ -365,20 +453,6 @@ public class Main {
             return false;
         }
         throw new IllegalArgumentException("Очікувалося true/false або так/ні.");
-    }
-
-    /**
-     * Конкретний нащадок абстрактного Book для створення базового примірника книги.
-     */
-    private static final class StandardBook extends Book {
-        private StandardBook(String title, String author, int year, int pages, Genre genre) {
-            super(title, author, year, pages, genre);
-        }
-
-        @Override
-        public String getEditionInfo() {
-            return "Базове видання";
-        }
     }
 
     /**
