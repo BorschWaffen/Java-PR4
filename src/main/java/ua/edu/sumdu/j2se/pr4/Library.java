@@ -7,7 +7,8 @@ import java.util.UUID;
 
 /**
  * Клас-контейнер (агрегація), що зберігає колекцію книг і кількість кожного примірника.
- * Підтримує додавання з обліком кількості, пошук (включно з UUID) та сортування.
+ * Підтримує додавання з обліком кількості, пошук (включно з UUID),
+ * сортування через Comparable і Comparator, а також модифікацію (update) та видалення (delete).
  */
 public class Library {
     private String name;
@@ -54,6 +55,51 @@ public class Library {
         }
 
         entries.add(new BookEntry(bk, quantity));
+    }
+
+    /**
+     * Модифікує існуючий об'єкт книги у колекції, замінюючи його на newObject
+     * зі збереженням поточної кількості примірників у позиції.
+     *
+     * @param existingObject об'єкт, який потрібно знайти та оновити
+     * @param newObject      новий стан об'єкта книги
+     * @return true, якщо оновлення виконано; false, якщо об'єкт не знайдено або список порожній
+     */
+    public boolean update(Book existingObject, Book newObject) {
+        if (existingObject == null || newObject == null || entries.isEmpty()) {
+            return false;
+        }
+
+        for (int i = 0; i < entries.size(); i++) {
+            BookEntry currentEntry = entries.get(i);
+            if (currentEntry.getBook().equals(existingObject)) {
+                int currentQty = currentEntry.getQuantity().intValue();
+                entries.set(i, new BookEntry(newObject, currentQty));
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Видаляє позицію з вказаним об'єктом книги з колекції бібліотеки.
+     *
+     * @param existingObject об'єкт книги, який потрібно видалити
+     * @return true, якщо видалення виконано; false, якщо об'єкт не знайдено або список порожній
+     */
+    public boolean delete(Book existingObject) {
+        if (existingObject == null || entries.isEmpty()) {
+            return false;
+        }
+
+        for (int i = 0; i < entries.size(); i++) {
+            BookEntry currentEntry = entries.get(i);
+            if (currentEntry.getBook().equals(existingObject)) {
+                entries.remove(i);
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

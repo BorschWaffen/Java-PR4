@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: ua.edu.sumdu.j2se.pr4.BookTest
 -------------------------------------------------------------------------------
-Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.072 s -- in ua.edu.sumdu.j2se.pr4.BookTest
+Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.060 s -- in ua.edu.sumdu.j2se.pr4.BookTest
