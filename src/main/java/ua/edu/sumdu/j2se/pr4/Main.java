@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 /**
- * Клас-драйвер для Практичної роботи №9.
- * Підтримує ієрархію з 5 класів, поліморфізм, консольне меню та збереження стану у файл.
+ * Клас-драйвер для Практичної роботи №10.
+ * Реалізує меню з пошуком об'єктів у колекції за різними критеріями без її зміни.
  */
 public class Main {
     private static final String DATA_FILE = "input.txt";
@@ -16,41 +16,229 @@ public class Main {
         boolean running = true;
 
         System.out.println("===================================================");
-        System.out.println("Практична робота №9: Ієрархія та робота з файлами");
+        System.out.println("Практична робота №10: Пошук у колекціях");
         System.out.println("===================================================");
 
         BookFileStorage.loadFromFile(DATA_FILE, books);
 
         while (running) {
             System.out.println("\n--- ГОЛОВНЕ МЕНЮ ---");
-            System.out.println("1. Створити новий об’єкт");
-            System.out.println("2. Вивести інформацію про всі об’єкти");
-            System.out.println("3. Завершити роботу програми");
+            System.out.println("1. Пошук об’єкта");
+            System.out.println("2. Створити новий об’єкт");
+            System.out.println("3. Вивести інформацію про всі об’єкти");
+            System.out.println("4. Завершити роботу програми");
             System.out.print("Оберіть пункт меню: ");
 
             String choice = scanner.nextLine().trim();
 
             switch (choice) {
                 case "1":
-                    createObjectMenu(scanner, books);
+                    searchMenu(scanner, books);
                     break;
 
                 case "2":
-                    printAllBooks(books);
+                    createObjectMenu(scanner, books);
                     break;
 
                 case "3":
+                    printAllBooks(books);
+                    break;
+
+                case "4":
                     BookFileStorage.saveToFile(DATA_FILE, books);
                     System.out.println("Роботу програми завершено.");
                     running = false;
                     break;
 
                 default:
-                    System.out.println("Некоректний вибір. Введіть 1, 2 або 3.");
+                    System.out.println("Некоректний вибір. Введіть число від 1 до 4.");
             }
         }
 
         scanner.close();
+    }
+
+    /**
+     * Підменю вибору критерію пошуку або повернення до головного меню.
+     * Не змінює передану колекцію.
+     *
+     * @param scanner сканер вхідного потоку
+     * @param books   колекція об'єктів Book
+     */
+    private static void searchMenu(Scanner scanner, ArrayList<Book> books) {
+        while (true) {
+            System.out.println("\n--- ПОШУК ОБ'ЄКТА: ОБЕРІТЬ КРИТЕРІЙ ---");
+            System.out.println("1. За назвою (містить текст)");
+            System.out.println("2. За жанром");
+            System.out.println("3. За мінімальною кількістю сторінок");
+            System.out.println("0. Повернутися до головного меню");
+            System.out.print("Ваш вибір: ");
+
+            String criterionChoice = scanner.nextLine().trim();
+
+            if ("0".equals(criterionChoice)) {
+                System.out.println("Повернення до головного меню.");
+                return;
+            }
+
+            if (books.isEmpty()) {
+                System.out.println("Колекція порожня — пошук не дав результатів.");
+                continue;
+            }
+
+            switch (criterionChoice) {
+                case "1":
+                    System.out.print("Введіть фрагмент назви для пошуку: ");
+                    String titleQuery = scanner.nextLine().trim();
+                    ArrayList<Book> byTitle = findBooksByTitle(books, titleQuery);
+                    printSearchResults(byTitle, "за назвою \"" + titleQuery + "\"");
+                    break;
+
+                case "2":
+                    Genre selectedGenre = readGenreForSearch(scanner);
+                    if (selectedGenre != null) {
+                        ArrayList<Book> byGenre = findBooksByGenre(books, selectedGenre);
+                        printSearchResults(byGenre, "за жанром \"" + selectedGenre.getDescription() + "\"");
+                    }
+                    break;
+
+                case "3":
+                    System.out.print("Введіть мінімальну кількість сторінок: ");
+                    String pagesRaw = scanner.nextLine().trim();
+                    try {
+                        int minPages = Integer.parseInt(pagesRaw);
+                        if (minPages <= 0) {
+                            System.out.println("Помилка: мінімальна кількість сторінок має бути більшою за нуль.");
+                        } else {
+                            ArrayList<Book> byPages = findBooksByMinPages(books, minPages);
+                            printSearchResults(byPages, "з кількістю сторінок >= " + minPages);
+                        }
+                    } catch (NumberFormatException e) {
+                        System.out.println("Помилка: введіть коректне ціле число.");
+                    }
+                    break;
+
+                default:
+                    System.out.println("Невідомий критерій пошуку. Оберіть 1–3 або 0 для виходу.");
+            }
+        }
+    }
+
+    /**
+     * Критерій 1: пошук усіх книг, у назві яких зустрічається заданий підрядок (без урахування регістру).
+     *
+     * @param books вихідна колекція (не модифікується)
+     * @param query шуканий фрагмент назви
+     * @return список знайдених збігів
+     */
+    private static ArrayList<Book> findBooksByTitle(ArrayList<Book> books, String query) {
+        ArrayList<Book> matches = new ArrayList<>();
+        String normalizedQuery = query.toLowerCase();
+
+        for (int i = 0; i < books.size(); i++) {
+            Book book = books.get(i);
+            if (book.getTitle().toLowerCase().contains(normalizedQuery)) {
+                matches.add(book);
+            }
+        }
+        return matches;
+    }
+
+    /**
+     * Критерій 2: пошук усіх книг за вказаним жанром.
+     *
+     * @param books вихідна колекція (не модифікується)
+     * @param genre жанр книги
+     * @return список знайдених збігів
+     */
+    private static ArrayList<Book> findBooksByGenre(ArrayList<Book> books, Genre genre) {
+        ArrayList<Book> matches = new ArrayList<>();
+
+        for (int i = 0; i < books.size(); i++) {
+            Book book = books.get(i);
+            if (book.getGenre() == genre) {
+                matches.add(book);
+            }
+        }
+        return matches;
+    }
+
+    /**
+     * Критерій 3: пошук усіх книг із кількістю сторінок не менше заданого порогу.
+     *
+     * @param books    вихідна колекція (не модифікується)
+     * @param minPages мінімальна кількість сторінок
+     * @return список знайдених збігів
+     */
+    private static ArrayList<Book> findBooksByMinPages(ArrayList<Book> books, int minPages) {
+        ArrayList<Book> matches = new ArrayList<>();
+
+        for (int i = 0; i < books.size(); i++) {
+            Book book = books.get(i);
+            if (book.getPages() >= minPages) {
+                matches.add(book);
+            }
+        }
+        return matches;
+    }
+
+    /**
+     * Виводить результати пошуку або повідомлення про відсутність збігів.
+     *
+     * @param results         список знайдених об'єктів
+     * @param criterionLabel опис критерію для виводу
+     */
+    private static void printSearchResults(ArrayList<Book> results, String criterionLabel) {
+        if (results.isEmpty()) {
+            System.out.println("Жоден об'єкт не відповідає умовам пошуку (" + criterionLabel + ").");
+            return;
+        }
+
+        System.out.println("\n--- РЕЗУЛЬТАТИ ПОШУКУ (" + criterionLabel + "), знайдено: " + results.size() + " ---");
+        for (int i = 0; i < results.size(); i++) {
+            Book item = results.get(i);
+            System.out.println((i + 1) + ". [" + item.getEditionInfo() + "] " + item.toString());
+        }
+    }
+
+    /**
+     * Зчитує вибір жанру для пошуку.
+     *
+     * @param scanner сканер вхідного потоку
+     * @return обраний жанр або null при некоректному вводі
+     */
+    private static Genre readGenreForSearch(Scanner scanner) {
+        System.out.println("Оберіть жанр: 1-Художня, 2-Фентезі, 3-Наукова, 4-Історія, 5-Інше");
+        System.out.print("Ваш вибір: ");
+        String raw = scanner.nextLine().trim();
+        try {
+            int genreChoice = Integer.parseInt(raw);
+            return mapGenreChoice(genreChoice);
+        } catch (NumberFormatException e) {
+            System.out.println("Помилка: введіть номер жанру від 1 до 5.");
+            return null;
+        }
+    }
+
+    /**
+     * Перетворює числовий вибір на значення enum Genre.
+     *
+     * @param genreChoice номер пункту (1-5)
+     * @return відповідне значення Genre
+     */
+    private static Genre mapGenreChoice(int genreChoice) {
+        switch (genreChoice) {
+            case 1:
+                return Genre.FICTION;
+            case 2:
+                return Genre.FANTASY;
+            case 3:
+                return Genre.SCIENCE;
+            case 4:
+                return Genre.HISTORY;
+            default:
+                return Genre.OTHER;
+        }
     }
 
     /**
@@ -199,25 +387,7 @@ public class Main {
 
         System.out.println("Оберіть жанр: 1-Художня, 2-Фентезі, 3-Наукова, 4-Історія, 5-Інше");
         int genreChoice = Integer.parseInt(scanner.nextLine().trim());
-
-        Genre genre;
-        switch (genreChoice) {
-            case 1:
-                genre = Genre.FICTION;
-                break;
-            case 2:
-                genre = Genre.FANTASY;
-                break;
-            case 3:
-                genre = Genre.SCIENCE;
-                break;
-            case 4:
-                genre = Genre.HISTORY;
-                break;
-            default:
-                genre = Genre.OTHER;
-                break;
-        }
+        Genre genre = mapGenreChoice(genreChoice);
 
         return new Book(title, author, year, pages, genre);
     }
