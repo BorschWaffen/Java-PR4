@@ -9,20 +9,20 @@ class BookTest {
     void shouldThrowExceptionWhenInvalidValueInSetter() {
         Book book = new StandardBook("Valid Title", "Valid Author", 2020, 300, Genre.FICTION);
 
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(InvalidFieldValueException.class, () -> {
             book.setPages(-50);
         });
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(InvalidFieldValueException.class, () -> {
             book.setTitle("");
         });
     }
 
     @Test
     void shouldThrowExceptionWhenInvalidConstructorData() {
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(InvalidFieldValueException.class, () -> {
             new StandardBook("Title", "Author", 2050, 100, Genre.FICTION);
         });
-        assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(InvalidFieldValueException.class, () -> {
             new StandardBook("Title", "Author", 2020, 100, null);
         });
     }
