@@ -4,8 +4,9 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 /**
- * Клас-драйвер для Практичної роботи №11.
- * Працює з класом-контейнером Library, підтримує облік кількості книг, пошук та збереження у файл.
+ * Клас-драйвер для Практичної роботи №12.
+ * Підтримує ієрархію з 5 класів, поліморфізм, пошук у колекції Library,
+ * роботу з файлом input.txt та збереження створених об'єктів у БД через JDBC.
  */
 public class Main {
     private static final String DATA_FILE = "input.txt";
@@ -16,9 +17,10 @@ public class Main {
         boolean running = true;
 
         System.out.println("===================================================");
-        System.out.println("Практична робота №11: Колекції, агрегація, обгортки");
+        System.out.println("Практична робота №12: Інтеграція з базою даних (JDBC)");
         System.out.println("===================================================");
 
+        DatabaseManager dbManager = initializeDatabaseManager(args);
         BookFileStorage.loadFromFile(DATA_FILE, library);
 
         while (running) {
@@ -37,7 +39,7 @@ public class Main {
                     break;
 
                 case "2":
-                    createObjectMenu(scanner, library);
+                    createObjectMenu(scanner, library, dbManager);
                     break;
 
                 case "3":
@@ -56,6 +58,54 @@ public class Main {
         }
 
         scanner.close();
+    }
+
+    /**
+     * Ініціалізує DatabaseManager на основі шляху до конфіг-файлу, переданого через args.
+     *
+     * @param args аргументи командного рядка
+     * @return екземпляр DatabaseManager або null, якщо конфігурація недоступна
+     */
+    private static DatabaseManager initializeDatabaseManager(String[] args) {
+        if (args == null || args.length == 0) {
+            System.out.println("Попередження: шлях до файлу конфігурації БД не передано через args.");
+            return null;
+        }
+
+        String configPath = args[0].trim();
+        if (configPath.isEmpty()) {
+            System.out.println("Попередження: передано порожній шлях до файлу конфігурації БД.");
+            return null;
+        }
+
+        try {
+            DatabaseManager manager = new DatabaseManager(configPath);
+            System.out.println("Конфігурацію БД успішно завантажено з файлу: " + configPath);
+            return manager;
+        } catch (Exception e) {
+            System.out.println("Помилка ініціалізації підключення до БД (" + configPath + "): " + e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Зберігає створений об'єкт у БД, якщо DatabaseManager ініціалізований.
+     *
+     * @param dbManager менеджер бази даних
+     * @param book      створений об'єкт
+     */
+    private static void saveToDatabaseIfAvailable(DatabaseManager dbManager, Book book) {
+        if (dbManager == null) {
+            System.out.println("Запис у БД пропущено: DatabaseManager не ініціалізовано.");
+            return;
+        }
+
+        boolean inserted = dbManager.insertBook(book);
+        if (inserted) {
+            System.out.println("Запис успішно додано до таблиці books у базі даних.");
+        } else {
+            System.out.println("Не вдалося додати запис до бази даних.");
+        }
     }
 
     /**
@@ -176,12 +226,13 @@ public class Main {
     }
 
     /**
-     * Підменю створення об'єкта та додавання до бібліотеки з урахуванням кількості.
+     * Підменю створення об'єкта, додавання до бібліотеки та збереження в БД.
      *
-     * @param scanner сканер вхідного потоку
-     * @param library бібліотека
+     * @param scanner   сканер вхідного потоку
+     * @param library   бібліотека
+     * @param dbManager менеджер бази даних
      */
-    private static void createObjectMenu(Scanner scanner, Library library) {
+    private static void createObjectMenu(Scanner scanner, Library library, DatabaseManager dbManager) {
         while (true) {
             System.out.println("\n--- СТВОРЕННЯ ОБ'ЄКТА: ОБЕРІТЬ ТИП ---");
             System.out.println("1. Book (звичайна книга)");
@@ -205,6 +256,7 @@ public class Main {
                         Book base = readBaseBook(scanner);
                         int qty = readQuantity(scanner);
                         library.addNewBook(base, qty);
+                        saveToDatabaseIfAvailable(dbManager, base);
                         System.out.println("Операцію додавання Book виконано.");
                         return;
                     }
@@ -221,6 +273,7 @@ public class Main {
                                 base.getPages(), base.getGenre(), sizeMb, format
                         );
                         library.addNewBook(eBook, qty);
+                        saveToDatabaseIfAvailable(dbManager, eBook);
                         System.out.println("Операцію додавання EBook виконано.");
                         return;
                     }
@@ -237,6 +290,7 @@ public class Main {
                                 base.getPages(), base.getGenre(), weight, cover
                         );
                         library.addNewBook(paperBook, qty);
+                        saveToDatabaseIfAvailable(dbManager, paperBook);
                         System.out.println("Операцію додавання PaperBook виконано.");
                         return;
                     }
@@ -253,6 +307,7 @@ public class Main {
                                 base.getPages(), base.getGenre(), duration, narrator
                         );
                         library.addNewBook(audioBook, qty);
+                        saveToDatabaseIfAvailable(dbManager, audioBook);
                         System.out.println("Операцію додавання AudioBook виконано.");
                         return;
                     }
@@ -273,6 +328,7 @@ public class Main {
                                 base.getPages(), base.getGenre(), weight, cover, subject, hasIndex
                         );
                         library.addNewBook(refBook, qty);
+                        saveToDatabaseIfAvailable(dbManager, refBook);
                         System.out.println("Операцію додавання ReferenceBook виконано.");
                         return;
                     }
