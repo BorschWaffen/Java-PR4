@@ -4,25 +4,25 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 /**
- * Клас-драйвер для Практичної роботи №10.
- * Реалізує меню з пошуком об'єктів у колекції за різними критеріями без її зміни.
+ * Клас-драйвер для Практичної роботи №11.
+ * Працює з класом-контейнером Library, підтримує облік кількості книг, пошук та збереження у файл.
  */
 public class Main {
     private static final String DATA_FILE = "input.txt";
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        ArrayList<Book> books = new ArrayList<>();
+        Library library = new Library("Бібліотека СумДУ");
         boolean running = true;
 
         System.out.println("===================================================");
-        System.out.println("Практична робота №10: Пошук у колекціях");
+        System.out.println("Практична робота №11: Колекції, агрегація, обгортки");
         System.out.println("===================================================");
 
-        BookFileStorage.loadFromFile(DATA_FILE, books);
+        BookFileStorage.loadFromFile(DATA_FILE, library);
 
         while (running) {
-            System.out.println("\n--- ГОЛОВНЕ МЕНЮ ---");
+            System.out.println("\n--- ГОЛОВНЕ МЕНЮ (" + library.getName() + ") ---");
             System.out.println("1. Пошук об’єкта");
             System.out.println("2. Створити новий об’єкт");
             System.out.println("3. Вивести інформацію про всі об’єкти");
@@ -33,19 +33,19 @@ public class Main {
 
             switch (choice) {
                 case "1":
-                    searchMenu(scanner, books);
+                    searchMenu(scanner, library);
                     break;
 
                 case "2":
-                    createObjectMenu(scanner, books);
+                    createObjectMenu(scanner, library);
                     break;
 
                 case "3":
-                    printAllBooks(books);
+                    printAllEntries(library);
                     break;
 
                 case "4":
-                    BookFileStorage.saveToFile(DATA_FILE, books);
+                    BookFileStorage.saveToFile(DATA_FILE, library);
                     System.out.println("Роботу програми завершено.");
                     running = false;
                     break;
@@ -59,13 +59,12 @@ public class Main {
     }
 
     /**
-     * Підменю вибору критерію пошуку або повернення до головного меню.
-     * Не змінює передану колекцію.
+     * Підменю пошуку у бібліотеці без зміни її колекції.
      *
      * @param scanner сканер вхідного потоку
-     * @param books   колекція об'єктів Book
+     * @param library бібліотека
      */
-    private static void searchMenu(Scanner scanner, ArrayList<Book> books) {
+    private static void searchMenu(Scanner scanner, Library library) {
         while (true) {
             System.out.println("\n--- ПОШУК ОБ'ЄКТА: ОБЕРІТЬ КРИТЕРІЙ ---");
             System.out.println("1. За назвою (містить текст)");
@@ -81,8 +80,8 @@ public class Main {
                 return;
             }
 
-            if (books.isEmpty()) {
-                System.out.println("Колекція порожня — пошук не дав результатів.");
+            if (library.isEmpty()) {
+                System.out.println("Бібліотека порожня — пошук не дав результатів.");
                 continue;
             }
 
@@ -90,14 +89,14 @@ public class Main {
                 case "1":
                     System.out.print("Введіть фрагмент назви для пошуку: ");
                     String titleQuery = scanner.nextLine().trim();
-                    ArrayList<Book> byTitle = findBooksByTitle(books, titleQuery);
+                    ArrayList<BookEntry> byTitle = library.findBooksByTitle(titleQuery);
                     printSearchResults(byTitle, "за назвою \"" + titleQuery + "\"");
                     break;
 
                 case "2":
                     Genre selectedGenre = readGenreForSearch(scanner);
                     if (selectedGenre != null) {
-                        ArrayList<Book> byGenre = findBooksByGenre(books, selectedGenre);
+                        ArrayList<BookEntry> byGenre = library.findBooksByGenre(selectedGenre);
                         printSearchResults(byGenre, "за жанром \"" + selectedGenre.getDescription() + "\"");
                     }
                     break;
@@ -110,7 +109,7 @@ public class Main {
                         if (minPages <= 0) {
                             System.out.println("Помилка: мінімальна кількість сторінок має бути більшою за нуль.");
                         } else {
-                            ArrayList<Book> byPages = findBooksByMinPages(books, minPages);
+                            ArrayList<BookEntry> byPages = library.findBooksByMinPages(minPages);
                             printSearchResults(byPages, "з кількістю сторінок >= " + minPages);
                         }
                     } catch (NumberFormatException e) {
@@ -125,70 +124,12 @@ public class Main {
     }
 
     /**
-     * Критерій 1: пошук усіх книг, у назві яких зустрічається заданий підрядок (без урахування регістру).
-     *
-     * @param books вихідна колекція (не модифікується)
-     * @param query шуканий фрагмент назви
-     * @return список знайдених збігів
-     */
-    private static ArrayList<Book> findBooksByTitle(ArrayList<Book> books, String query) {
-        ArrayList<Book> matches = new ArrayList<>();
-        String normalizedQuery = query.toLowerCase();
-
-        for (int i = 0; i < books.size(); i++) {
-            Book book = books.get(i);
-            if (book.getTitle().toLowerCase().contains(normalizedQuery)) {
-                matches.add(book);
-            }
-        }
-        return matches;
-    }
-
-    /**
-     * Критерій 2: пошук усіх книг за вказаним жанром.
-     *
-     * @param books вихідна колекція (не модифікується)
-     * @param genre жанр книги
-     * @return список знайдених збігів
-     */
-    private static ArrayList<Book> findBooksByGenre(ArrayList<Book> books, Genre genre) {
-        ArrayList<Book> matches = new ArrayList<>();
-
-        for (int i = 0; i < books.size(); i++) {
-            Book book = books.get(i);
-            if (book.getGenre() == genre) {
-                matches.add(book);
-            }
-        }
-        return matches;
-    }
-
-    /**
-     * Критерій 3: пошук усіх книг із кількістю сторінок не менше заданого порогу.
-     *
-     * @param books    вихідна колекція (не модифікується)
-     * @param minPages мінімальна кількість сторінок
-     * @return список знайдених збігів
-     */
-    private static ArrayList<Book> findBooksByMinPages(ArrayList<Book> books, int minPages) {
-        ArrayList<Book> matches = new ArrayList<>();
-
-        for (int i = 0; i < books.size(); i++) {
-            Book book = books.get(i);
-            if (book.getPages() >= minPages) {
-                matches.add(book);
-            }
-        }
-        return matches;
-    }
-
-    /**
      * Виводить результати пошуку або повідомлення про відсутність збігів.
      *
-     * @param results         список знайдених об'єктів
-     * @param criterionLabel опис критерію для виводу
+     * @param results        список знайдених позицій
+     * @param criterionLabel опис критерію
      */
-    private static void printSearchResults(ArrayList<Book> results, String criterionLabel) {
+    private static void printSearchResults(ArrayList<BookEntry> results, String criterionLabel) {
         if (results.isEmpty()) {
             System.out.println("Жоден об'єкт не відповідає умовам пошуку (" + criterionLabel + ").");
             return;
@@ -196,8 +137,7 @@ public class Main {
 
         System.out.println("\n--- РЕЗУЛЬТАТИ ПОШУКУ (" + criterionLabel + "), знайдено: " + results.size() + " ---");
         for (int i = 0; i < results.size(); i++) {
-            Book item = results.get(i);
-            System.out.println((i + 1) + ". [" + item.getEditionInfo() + "] " + item.toString());
+            System.out.println((i + 1) + ". " + results.get(i).toString());
         }
     }
 
@@ -205,7 +145,7 @@ public class Main {
      * Зчитує вибір жанру для пошуку.
      *
      * @param scanner сканер вхідного потоку
-     * @return обраний жанр або null при некоректному вводі
+     * @return обраний жанр або null
      */
     private static Genre readGenreForSearch(Scanner scanner) {
         System.out.println("Оберіть жанр: 1-Художня, 2-Фентезі, 3-Наукова, 4-Історія, 5-Інше");
@@ -220,12 +160,6 @@ public class Main {
         }
     }
 
-    /**
-     * Перетворює числовий вибір на значення enum Genre.
-     *
-     * @param genreChoice номер пункту (1-5)
-     * @return відповідне значення Genre
-     */
     private static Genre mapGenreChoice(int genreChoice) {
         switch (genreChoice) {
             case 1:
@@ -242,12 +176,12 @@ public class Main {
     }
 
     /**
-     * Підменю створення нового об'єкта обраного типу з можливістю повернення назад.
+     * Підменю створення об'єкта та додавання до бібліотеки з урахуванням кількості.
      *
      * @param scanner сканер вхідного потоку
-     * @param books   колекція створених об'єктів
+     * @param library бібліотека
      */
-    private static void createObjectMenu(Scanner scanner, ArrayList<Book> books) {
+    private static void createObjectMenu(Scanner scanner, Library library) {
         while (true) {
             System.out.println("\n--- СТВОРЕННЯ ОБ'ЄКТА: ОБЕРІТЬ ТИП ---");
             System.out.println("1. Book (звичайна книга)");
@@ -269,8 +203,9 @@ public class Main {
                 switch (typeChoice) {
                     case "1": {
                         Book base = readBaseBook(scanner);
-                        books.add(base);
-                        System.out.println("Об'єкт Book додано до колекції.");
+                        int qty = readQuantity(scanner);
+                        library.addNewBook(base, qty);
+                        System.out.println("Операцію додавання Book виконано.");
                         return;
                     }
                     case "2": {
@@ -279,13 +214,14 @@ public class Main {
                         double sizeMb = Double.parseDouble(scanner.nextLine().trim().replace(',', '.'));
                         System.out.print("Введіть формат файлу (наприклад, EPUB, PDF): ");
                         String format = scanner.nextLine();
+                        int qty = readQuantity(scanner);
 
                         EBook eBook = new EBook(
                                 base.getTitle(), base.getAuthor(), base.getYear(),
                                 base.getPages(), base.getGenre(), sizeMb, format
                         );
-                        books.add(eBook);
-                        System.out.println("Об'єкт EBook додано до колекції.");
+                        library.addNewBook(eBook, qty);
+                        System.out.println("Операцію додавання EBook виконано.");
                         return;
                     }
                     case "3": {
@@ -294,13 +230,14 @@ public class Main {
                         int weight = Integer.parseInt(scanner.nextLine().trim());
                         System.out.print("Введіть тип палітурки: ");
                         String cover = scanner.nextLine();
+                        int qty = readQuantity(scanner);
 
                         PaperBook paperBook = new PaperBook(
                                 base.getTitle(), base.getAuthor(), base.getYear(),
                                 base.getPages(), base.getGenre(), weight, cover
                         );
-                        books.add(paperBook);
-                        System.out.println("Об'єкт PaperBook додано до колекції.");
+                        library.addNewBook(paperBook, qty);
+                        System.out.println("Операцію додавання PaperBook виконано.");
                         return;
                     }
                     case "4": {
@@ -309,13 +246,14 @@ public class Main {
                         int duration = Integer.parseInt(scanner.nextLine().trim());
                         System.out.print("Введіть ім'я диктора: ");
                         String narrator = scanner.nextLine();
+                        int qty = readQuantity(scanner);
 
                         AudioBook audioBook = new AudioBook(
                                 base.getTitle(), base.getAuthor(), base.getYear(),
                                 base.getPages(), base.getGenre(), duration, narrator
                         );
-                        books.add(audioBook);
-                        System.out.println("Об'єкт AudioBook додано до колекції.");
+                        library.addNewBook(audioBook, qty);
+                        System.out.println("Операцію додавання AudioBook виконано.");
                         return;
                     }
                     case "5": {
@@ -328,13 +266,14 @@ public class Main {
                         String subject = scanner.nextLine();
                         System.out.print("Чи є покажчик (true/false або так/ні): ");
                         boolean hasIndex = parseBooleanInput(scanner.nextLine().trim());
+                        int qty = readQuantity(scanner);
 
                         ReferenceBook refBook = new ReferenceBook(
                                 base.getTitle(), base.getAuthor(), base.getYear(),
                                 base.getPages(), base.getGenre(), weight, cover, subject, hasIndex
                         );
-                        books.add(refBook);
-                        System.out.println("Об'єкт ReferenceBook додано до колекції.");
+                        library.addNewBook(refBook, qty);
+                        System.out.println("Операцію додавання ReferenceBook виконано.");
                         return;
                     }
                     default:
@@ -349,29 +288,27 @@ public class Main {
     }
 
     /**
-     * Виводить інформацію про всі об'єкти з колекції через поліморфізм.
+     * Виводить усі позиції з бібліотеки та їхню кількість.
      *
-     * @param books колекція об'єктів Book
+     * @param library бібліотека
      */
-    private static void printAllBooks(ArrayList<Book> books) {
-        if (books.isEmpty()) {
-            System.out.println("Колекція порожня. Спочатку створіть хоча б один об'єкт.");
+    private static void printAllEntries(Library library) {
+        if (library.isEmpty()) {
+            System.out.println("Бібліотека порожня. Спочатку створіть хоча б один об'єкт.");
             return;
         }
 
-        System.out.println("\n--- УСІ ОБ'ЄКТИ В КОЛЕКЦІЇ (всього: " + books.size() + ") ---");
-        for (int i = 0; i < books.size(); i++) {
-            Book item = books.get(i);
-            System.out.println((i + 1) + ". [" + item.getEditionInfo() + "] " + item.toString());
+        System.out.println("\n--- УСІ ОБ'ЄКТИ В БІБЛІОТЕЦІ (позицій: " + library.size() + ") ---");
+        for (int i = 0; i < library.size(); i++) {
+            System.out.println((i + 1) + ". " + library.getEntry(i).toString());
         }
     }
 
-    /**
-     * Зчитує базові атрибути книги з консолі.
-     *
-     * @param scanner сканер вхідного потоку
-     * @return об'єкт Book з базовими полями
-     */
+    private static int readQuantity(Scanner scanner) {
+        System.out.print("Введіть кількість примірників: ");
+        return Integer.parseInt(scanner.nextLine().trim());
+    }
+
     private static Book readBaseBook(Scanner scanner) {
         System.out.print("Введіть назву: ");
         String title = scanner.nextLine();
@@ -392,12 +329,6 @@ public class Main {
         return new Book(title, author, year, pages, genre);
     }
 
-    /**
-     * Розпізнає логічне значення з тексту (true/false/так/ні/1/0).
-     *
-     * @param input рядок користувача
-     * @return логічне значення
-     */
     private static boolean parseBooleanInput(String input) {
         String normalized = input.toLowerCase();
         if ("true".equals(normalized) || "так".equals(normalized) || "yes".equals(normalized) || "1".equals(normalized)) {
