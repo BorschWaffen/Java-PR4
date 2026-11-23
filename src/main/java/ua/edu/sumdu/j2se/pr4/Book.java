@@ -40,7 +40,7 @@ public abstract class Book implements Comparable<Book>, Identifiable {
      */
     public Book(Book other) {
         if (other == null) {
-            throw new IllegalArgumentException("Об'єкт для копіювання не може бути null.");
+            throw new InvalidFieldValueException("Об'єкт для копіювання не може бути null.");
         }
         this.uuid = UUID.randomUUID();
         this.title = other.title;
@@ -66,7 +66,7 @@ public abstract class Book implements Comparable<Book>, Identifiable {
      */
     public void setTitle(String title) {
         if (title == null || title.trim().isEmpty()) {
-            throw new IllegalArgumentException("Назва не може бути порожньою.");
+            throw new InvalidFieldValueException("Назва не може бути порожньою.");
         }
         this.title = title.trim();
     }
@@ -82,7 +82,7 @@ public abstract class Book implements Comparable<Book>, Identifiable {
      */
     public void setAuthor(String author) {
         if (author == null || author.trim().isEmpty()) {
-            throw new IllegalArgumentException("Автор не може бути порожнім.");
+            throw new InvalidFieldValueException("Автор не може бути порожнім.");
         }
         this.author = author.trim();
     }
@@ -98,7 +98,7 @@ public abstract class Book implements Comparable<Book>, Identifiable {
      */
     public void setYear(int year) {
         if (year <= 0 || year > 2026) {
-            throw new IllegalArgumentException("Некоректний рік видання.");
+            throw new InvalidFieldValueException("Некоректний рік видання: " + year + ".");
         }
         this.year = year;
     }
@@ -114,7 +114,7 @@ public abstract class Book implements Comparable<Book>, Identifiable {
      */
     public void setPages(int pages) {
         if (pages <= 0) {
-            throw new IllegalArgumentException("Кількість сторінок має бути більшою за нуль.");
+            throw new InvalidFieldValueException("Кількість сторінок має бути більшою за нуль: " + pages + ".");
         }
         this.pages = pages;
     }
@@ -130,7 +130,7 @@ public abstract class Book implements Comparable<Book>, Identifiable {
      */
     public void setGenre(Genre genre) {
         if (genre == null) {
-            throw new IllegalArgumentException("Жанр не може бути порожнім (null).");
+            throw new InvalidFieldValueException("Жанр не може бути порожнім (null).");
         }
         this.genre = genre;
     }

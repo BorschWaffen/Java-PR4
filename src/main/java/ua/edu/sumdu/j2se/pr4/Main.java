@@ -5,9 +5,9 @@ import java.util.Comparator;
 import java.util.Scanner;
 
 /**
- * Клас-драйвер для Лабораторної роботи №17.
- * Підтримує пошук, створення, модифікацію (update) та видалення (delete) об'єктів
- * через агрегуючий клас Library, вивід списку, сортування та роботу з файлом.
+ * Клас-драйвер для Лабораторної роботи №18.
+ * Демонструє кидання та перехоплення власних винятків (InvalidFieldValueException, ObjectNotFoundException)
+ * у бізнес-логіці та інтерактивному меню без аварійного завершення.
  */
 public class Main {
     private static final String DATA_FILE = "input.txt";
@@ -18,7 +18,7 @@ public class Main {
         boolean running = true;
 
         System.out.println("===================================================");
-        System.out.println("Лабораторна робота №17: Модифікація та видалення");
+        System.out.println("Лабораторна робота №18: Власні винятки та автотести");
         System.out.println("===================================================");
 
         BookFileStorage.loadFromFile(DATA_FILE, library);
@@ -36,51 +36,51 @@ public class Main {
 
             String choice = scanner.nextLine().trim();
 
-            switch (choice) {
-                case "1":
-                    searchMenu(scanner, library);
-                    break;
+            try {
+                switch (choice) {
+                    case "1":
+                        searchMenu(scanner, library);
+                        break;
 
-                case "2":
-                    createObjectMenu(scanner, library);
-                    break;
+                    case "2":
+                        createObjectMenu(scanner, library);
+                        break;
 
-                case "3":
-                    modifyObjectMenu(scanner, library);
-                    break;
+                    case "3":
+                        modifyObjectMenu(scanner, library);
+                        break;
 
-                case "4":
-                    deleteObjectMenu(scanner, library);
-                    break;
+                    case "4":
+                        deleteObjectMenu(scanner, library);
+                        break;
 
-                case "5":
-                    printAllEntries(library);
-                    break;
+                    case "5":
+                        printAllEntries(library);
+                        break;
 
-                case "6":
-                    sortMenu(scanner, library);
-                    break;
+                    case "6":
+                        sortMenu(scanner, library);
+                        break;
 
-                case "7":
-                    BookFileStorage.saveToFile(DATA_FILE, library);
-                    System.out.println("Роботу програми завершено.");
-                    running = false;
-                    break;
+                    case "7":
+                        BookFileStorage.saveToFile(DATA_FILE, library);
+                        System.out.println("Роботу програми завершено.");
+                        running = false;
+                        break;
 
-                default:
-                    System.out.println("Некоректний вибір. Введіть число від 1 до 7.");
+                    default:
+                        System.out.println("Некоректний вибір. Введіть число від 1 до 7.");
+                }
+            } catch (InvalidFieldValueException e) {
+                System.out.println("Помилка значення поля: " + e.getMessage() + " Повернення до меню.");
+            } catch (ObjectNotFoundException e) {
+                System.out.println("Об'єкт не знайдено: " + e.getMessage() + " Повернення до меню.");
             }
         }
 
         scanner.close();
     }
 
-    /**
-     * Меню модифікації обраного об'єкта через метод Library.update(...).
-     *
-     * @param scanner сканер вхідного потоку
-     * @param library бібліотека
-     */
     private static void modifyObjectMenu(Scanner scanner, Library library) {
         if (library.isEmpty()) {
             System.out.println("Колекція порожня — немає об'єктів для модифікації.");
@@ -95,7 +95,7 @@ public class Main {
         try {
             selectedIndex = Integer.parseInt(indexRaw);
         } catch (NumberFormatException e) {
-            System.out.println("Помилка: введіть коректний числовий номер об'єкта.");
+            System.out.println("Помилка: введіть коректний числовий номер об'єкта. Повернення до меню.");
             return;
         }
 
@@ -105,8 +105,7 @@ public class Main {
         }
 
         if (selectedIndex < 1 || selectedIndex > library.size()) {
-            System.out.println("Помилка: об'єкта з таким номером не існує.");
-            return;
+            throw new ObjectNotFoundException("Об'єкта під номером " + selectedIndex + " не існує.");
         }
 
         Book existingBook = library.getEntry(selectedIndex - 1).getBook();
@@ -135,19 +134,12 @@ public class Main {
             boolean updated = library.update(existingBook, updatedBook);
             if (updated) {
                 System.out.println("Об'єкт успішно модифіковано.");
-            } else {
-                System.out.println("Помилка: об'єкт не знайдено у колекції.");
             }
         } catch (NumberFormatException e) {
-            System.out.println("Помилка введення: очікувалося коректне число.");
-        } catch (IllegalArgumentException e) {
-            System.out.println("Помилка валідації нового значення: " + e.getMessage());
+            throw new InvalidFieldValueException("Очікувалося коректне числове значення.");
         }
     }
 
-    /**
-     * Створює новий примірник книги на основі існуючого з одним зміненим атрибутом.
-     */
     private static Book buildUpdatedBook(Scanner scanner, Book source, String attrChoice) {
         String title = source.getTitle();
         String author = source.getAuthor();
@@ -173,8 +165,7 @@ public class Main {
             int genreChoice = Integer.parseInt(scanner.nextLine().trim());
             genre = mapGenreChoice(genreChoice);
         } else {
-            System.out.println("Некоректний вибір атрибута.");
-            return null;
+            throw new InvalidFieldValueException("Некоректний вибір атрибута: " + attrChoice + ".");
         }
 
         if (source instanceof ReferenceBook) {
@@ -198,12 +189,6 @@ public class Main {
         }
     }
 
-    /**
-     * Меню видалення обраного об'єкта через метод Library.delete(...).
-     *
-     * @param scanner сканер вхідного потоку
-     * @param library бібліотека
-     */
     private static void deleteObjectMenu(Scanner scanner, Library library) {
         if (library.isEmpty()) {
             System.out.println("Колекція порожня — немає об'єктів для видалення.");
@@ -218,7 +203,7 @@ public class Main {
         try {
             selectedIndex = Integer.parseInt(indexRaw);
         } catch (NumberFormatException e) {
-            System.out.println("Помилка: введіть коректний числовий номер об'єкта.");
+            System.out.println("Помилка: введіть коректний числовий номер об'єкта. Повернення до меню.");
             return;
         }
 
@@ -228,8 +213,7 @@ public class Main {
         }
 
         if (selectedIndex < 1 || selectedIndex > library.size()) {
-            System.out.println("Помилка: об'єкта з таким номером не існує.");
-            return;
+            throw new ObjectNotFoundException("Об'єкта під номером " + selectedIndex + " не існує.");
         }
 
         Book targetBook = library.getEntry(selectedIndex - 1).getBook();
@@ -245,14 +229,9 @@ public class Main {
         boolean deleted = library.delete(targetBook);
         if (deleted) {
             System.out.println("Об'єкт успішно видалено з колекції.");
-        } else {
-            System.out.println("Помилка: об'єкт не знайдено у колекції.");
         }
     }
 
-    /**
-     * Підменю вибору критерію сортування з використанням лямбда-виразів Comparator.
-     */
     private static void sortMenu(Scanner scanner, Library library) {
         while (true) {
             System.out.println("\n--- СОРТУВАННЯ: ОБЕРІТЬ КРИТЕРІЙ ---");
@@ -344,15 +323,13 @@ public class Main {
         }
     }
 
-    /**
-     * Підменю пошуку у бібліотеці без зміни її колекції.
-     */
     private static void searchMenu(Scanner scanner, Library library) {
         while (true) {
             System.out.println("\n--- ПОШУК ОБ'ЄКТА: ОБЕРІТЬ КРИТЕРІЙ ---");
             System.out.println("1. За назвою (містить текст)");
             System.out.println("2. За жанром");
             System.out.println("3. За мінімальною кількістю сторінок");
+            System.out.println("4. За UUID");
             System.out.println("0. Повернутися до головного меню");
             System.out.print("Ваш вибір: ");
 
@@ -363,7 +340,7 @@ public class Main {
                 return;
             }
 
-            if (library.isEmpty()) {
+            if (library.isEmpty() && !"4".equals(criterionChoice)) {
                 System.out.println("Бібліотека порожня — пошук не дав результатів.");
                 continue;
             }
@@ -390,18 +367,29 @@ public class Main {
                     try {
                         int minPages = Integer.parseInt(pagesRaw);
                         if (minPages <= 0) {
-                            System.out.println("Помилка: мінімальна кількість сторінок має бути більшою за нуль.");
-                        } else {
-                            ArrayList<BookEntry> byPages = library.findBooksByMinPages(minPages);
-                            printSearchResults(byPages, "з кількістю сторінок >= " + minPages);
+                            throw new InvalidFieldValueException("Мінімальна кількість сторінок має бути більшою за нуль.");
                         }
+                        ArrayList<BookEntry> byPages = library.findBooksByMinPages(minPages);
+                        printSearchResults(byPages, "з кількістю сторінок >= " + minPages);
                     } catch (NumberFormatException e) {
-                        System.out.println("Помилка: введіть коректне ціле число.");
+                        throw new InvalidFieldValueException("Введіть коректне ціле число для кількості сторінок.");
+                    }
+                    break;
+
+                case "4":
+                    System.out.print("Введіть UUID об'єкта: ");
+                    String uuidInput = scanner.nextLine().trim();
+                    BookEntry found = library.findBookByUuid(uuidInput);
+                    if (found == null) {
+                        System.out.println("Об'єкт із вказаним UUID не знайдено.");
+                    } else {
+                        System.out.println("\n--- ЗНАЙДЕНО ЗА UUID ---");
+                        System.out.println(found.toString());
                     }
                     break;
 
                 default:
-                    System.out.println("Невідомий критерій пошуку. Оберіть 1–3 або 0 для виходу.");
+                    System.out.println("Невідомий критерій пошуку. Оберіть 1–4 або 0 для виходу.");
             }
         }
     }
@@ -426,8 +414,7 @@ public class Main {
             int genreChoice = Integer.parseInt(raw);
             return mapGenreChoice(genreChoice);
         } catch (NumberFormatException e) {
-            System.out.println("Помилка: введіть номер жанру від 1 до 5.");
-            return null;
+            throw new InvalidFieldValueException("Введіть номер жанру від 1 до 5.");
         }
     }
 
@@ -441,8 +428,10 @@ public class Main {
                 return Genre.SCIENCE;
             case 4:
                 return Genre.HISTORY;
-            default:
+            case 5:
                 return Genre.OTHER;
+            default:
+                throw new InvalidFieldValueException("Некоректний номер жанру: " + genreChoice + ".");
         }
     }
 
@@ -548,9 +537,7 @@ public class Main {
                         System.out.println("Невідомий тип об'єкта. Спробуйте ще раз або натисніть 0 для виходу.");
                 }
             } catch (NumberFormatException e) {
-                System.out.println("Помилка введення: очікувалося коректне числове значення.");
-            } catch (IllegalArgumentException e) {
-                System.out.println("Помилка валідації: " + e.getMessage());
+                throw new InvalidFieldValueException("Очікувалося коректне числове значення.");
             }
         }
     }
@@ -607,7 +594,7 @@ public class Main {
         if ("false".equals(normalized) || "ні".equals(normalized) || "no".equals(normalized) || "0".equals(normalized)) {
             return false;
         }
-        throw new IllegalArgumentException("Очікувалося true/false або так/ні.");
+        throw new InvalidFieldValueException("Очікувалося true/false або так/ні.");
     }
 
     private static final class BookData {

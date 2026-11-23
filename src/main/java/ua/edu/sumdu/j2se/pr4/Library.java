@@ -7,8 +7,8 @@ import java.util.UUID;
 
 /**
  * Клас-контейнер (агрегація), що зберігає колекцію книг і кількість кожного примірника.
- * Підтримує додавання з обліком кількості, пошук (включно з UUID),
- * сортування через Comparable і Comparator, а також модифікацію (update) та видалення (delete).
+ * Підтримує додавання, модифікацію (update), видалення (delete), пошук (включно з UUID)
+ * та сортування через Comparable і Comparator.
  */
 public class Library {
     private String name;
@@ -21,7 +21,7 @@ public class Library {
      */
     public Library(String name) {
         if (name == null || name.trim().isEmpty()) {
-            throw new IllegalArgumentException("Назва бібліотеки не може бути порожньою.");
+            throw new InvalidFieldValueException("Назва бібліотеки не може бути порожньою.");
         }
         this.name = name.trim();
         this.entries = new ArrayList<BookEntry>();
@@ -40,10 +40,10 @@ public class Library {
      */
     public void addNewBook(Book bk, int quantity) {
         if (bk == null) {
-            throw new IllegalArgumentException("Книга не може бути null.");
+            throw new InvalidFieldValueException("Книга не може бути null.");
         }
         if (quantity <= 0) {
-            throw new IllegalArgumentException("Кількість книг має бути більшою за нуль.");
+            throw new InvalidFieldValueException("Кількість книг має бути більшою за нуль.");
         }
 
         for (int i = 0; i < entries.size(); i++) {
@@ -63,11 +63,17 @@ public class Library {
      *
      * @param existingObject об'єкт, який потрібно знайти та оновити
      * @param newObject      новий стан об'єкта книги
-     * @return true, якщо оновлення виконано; false, якщо об'єкт не знайдено або список порожній
+     * @return true, якщо оновлення виконано
      */
     public boolean update(Book existingObject, Book newObject) {
-        if (existingObject == null || newObject == null || entries.isEmpty()) {
-            return false;
+        if (existingObject == null) {
+            throw new ObjectNotFoundException("Об'єкт для оновлення не вказано (null).");
+        }
+        if (newObject == null) {
+            throw new InvalidFieldValueException("Новий об'єкт книги не може бути null.");
+        }
+        if (entries.isEmpty()) {
+            throw new ObjectNotFoundException("Колекція порожня — об'єкт для оновлення не знайдено.");
         }
 
         for (int i = 0; i < entries.size(); i++) {
@@ -78,18 +84,21 @@ public class Library {
                 return true;
             }
         }
-        return false;
+        throw new ObjectNotFoundException("Об'єкт для оновлення не знайдено у колекції.");
     }
 
     /**
      * Видаляє позицію з вказаним об'єктом книги з колекції бібліотеки.
      *
      * @param existingObject об'єкт книги, який потрібно видалити
-     * @return true, якщо видалення виконано; false, якщо об'єкт не знайдено або список порожній
+     * @return true, якщо видалення виконано
      */
     public boolean delete(Book existingObject) {
-        if (existingObject == null || entries.isEmpty()) {
-            return false;
+        if (existingObject == null) {
+            throw new ObjectNotFoundException("Об'єкт для видалення не вказано (null).");
+        }
+        if (entries.isEmpty()) {
+            throw new ObjectNotFoundException("Колекція порожня — об'єкт для видалення не знайдено.");
         }
 
         for (int i = 0; i < entries.size(); i++) {
@@ -99,7 +108,7 @@ public class Library {
                 return true;
             }
         }
-        return false;
+        throw new ObjectNotFoundException("Об'єкт для видалення не знайдено у колекції.");
     }
 
     /**
@@ -154,7 +163,7 @@ public class Library {
      */
     public ArrayList<BookEntry> getSortedEntries(Comparator<BookEntry> comparator) {
         if (comparator == null) {
-            throw new IllegalArgumentException("Компаратор не може бути null.");
+            throw new InvalidFieldValueException("Компаратор не може бути null.");
         }
         ArrayList<BookEntry> sorted = new ArrayList<BookEntry>();
         for (int i = 0; i < entries.size(); i++) {
@@ -224,22 +233,26 @@ public class Library {
 
     /**
      * Пошук 4: за рядковим представленням UUID.
-     * Кидає IllegalArgumentException при некоректному форматі UUID.
+     * Кидає InvalidFieldValueException при некоректному форматі UUID.
      *
      * @param uuidString рядок з UUID
      * @return знайдена позиція BookEntry або null, якщо не знайдено
      */
     public BookEntry findBookByUuid(String uuidString) {
         if (uuidString == null || uuidString.trim().isEmpty()) {
-            throw new IllegalArgumentException("UUID не може бути порожнім.");
+            throw new InvalidFieldValueException("UUID не може бути порожнім.");
         }
-        UUID targetUuid = UUID.fromString(uuidString.trim());
-        for (int i = 0; i < entries.size(); i++) {
-            BookEntry entry = entries.get(i);
-            if (targetUuid.equals(entry.getBook().getUuid())) {
-                return entry;
+        try {
+            UUID targetUuid = UUID.fromString(uuidString.trim());
+            for (int i = 0; i < entries.size(); i++) {
+                BookEntry entry = entries.get(i);
+                if (targetUuid.equals(entry.getBook().getUuid())) {
+                    return entry;
+                }
             }
+            return null;
+        } catch (IllegalArgumentException e) {
+            throw new InvalidFieldValueException("Некоректний формат UUID: " + uuidString.trim());
         }
-        return null;
     }
 }
